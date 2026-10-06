@@ -1,0 +1,1424 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Galaxia Azul Hot Wheels - LOVE CODE</title>
+<script>
+document.documentElement.classList.add('theme-initializing');
+try {
+  if (localStorage.getItem('themePreference') === 'light') {
+    document.documentElement.classList.add('light-mode');
+  }
+} catch (error) {
+  // Keep the default dark theme if browser storage is unavailable.
+}
+</script>
+<!-- Anti-parpadeo de sesión: si la última vez había sesión, se asume hasta que Firebase confirme -->
+<script>
+try {
+  if (localStorage.getItem('authHint')) {
+    document.documentElement.classList.add('assume-logged-in');
+  }
+} catch (error) {}
+// Seguro: si Firebase no responde en 4s, se muestra el estado de invitado
+setTimeout(function () {
+  var slot = document.getElementById('navAccountSlot');
+  if (slot && slot.classList.contains('auth-pending')) {
+    document.documentElement.classList.remove('assume-logged-in');
+    slot.classList.add('guest-mode');
+    slot.classList.remove('auth-pending');
+  }
+}, 4000);
+</script>
+<style>
+:root {
+  --bg-color: #050510;
+  --text-color: #ffffff;
+  --text-muted: #aaaaaa;
+  --nav-bg: rgba(5, 5, 16, 0.85);
+  --border-color: rgba(255, 255, 255, 0.15);
+  --surface-color: rgba(255, 255, 255, 0.05);
+  --footer-color: rgba(5, 5, 12, 0.95);
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  isolation: isolate;
+  background: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+body.light-mode,
+html.light-mode body {
+  --bg-color: #ffffff;
+  --text-color: #111827;
+  --text-muted: #4b5563;
+  --nav-bg: rgba(255, 255, 255, 0.92);
+  --border-color: rgba(0, 0, 0, 0.12);
+  --surface-color: #f3f4f6;
+  --footer-color: #f3f4f6;
+}
+
+html { background-color: #050510; }
+html.light-mode { background-color: #ffffff; }
+
+html.theme-initializing *,
+html.theme-initializing *::before,
+html.theme-initializing *::after {
+  transition: none !important;
+}
+
+/* CANVAS FONDO GALAXIA */
+canvas#galaxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+}
+
+body.light-mode canvas#galaxy,
+html.light-mode canvas#galaxy { opacity: 0.3; }
+
+/* NAVBAR COMPARTIDA CON INDEX */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 12px 12px 12px 30px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 46, 136, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  flex-shrink: 0;
+  gap: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-size: 20px;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.logo img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ff2e88;
+  object-fit: cover;
+}
+
+.btn-nav-action {
+  background: #00bcd4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.btn-nav-action:hover { filter: brightness(1.2); }
+
+.btn-subir {
+  background: transparent;
+  color: #ccc;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+  flex-shrink: 1;
+}
+
+.theme-lang-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+}
+
+.btn-icon-theme {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 6px;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 18px;
+  cursor: pointer;
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-icon-theme:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.lang-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.lang-select-dropdown {
+  padding: 6px 14px;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 20px;
+  outline: none;
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+}
+
+.btn-donar { background: #00bcd4; color: white; }
+.btn-miembro { background: #d4a373; color: white; }
+.btn-reportar { background: #25d366; color: white; }
+.btn-login { background: transparent; color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-register { background: #00bcd4; color: white; }
+
+.nav-account-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 38px;
+  justify-content: flex-end;
+}
+
+.nav-account-slot.auth-pending { visibility: hidden; }
+
+.nav-account-slot.guest-mode { flex-basis: auto; }
+
+#guestAuthControls {
+  display: none;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.nav-account-slot.guest-mode #guestAuthControls { display: flex; }
+
+.nav-user-slot {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+}
+
+.user-menu-wrapper { position: relative; display: inline-block; }
+
+.user-avatar-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  overflow: hidden;
+  border: 2px solid #ff2e88;
+  border-radius: 50%;
+  background: #ff2e88;
+  color: #fff;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-avatar-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 46, 136, 0.5);
+}
+
+.user-avatar-btn img,
+.dropdown-avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+.user-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  width: 230px;
+  max-width: calc(100vw - 24px);
+  padding: 16px;
+  border-radius: 16px;
+  background: #fff;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+}
+
+.user-dropdown.active { opacity: 1; visibility: visible; transform: translateY(0); }
+
+.dropdown-header { display: flex; align-items: center; gap: 12px; min-width: 0; }
+
+.dropdown-avatar {
+  display: flex;
+  flex: 0 0 45px;
+  align-items: center;
+  justify-content: center;
+  width: 45px;
+  height: 45px;
+  overflow: hidden;
+  border-radius: 50%;
+  background: #ff2e88;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+.dropdown-info { display: flex; flex-direction: column; min-width: 0; overflow: hidden; }
+.dropdown-info h4,
+.dropdown-info p { overflow: hidden; margin: 0; text-overflow: ellipsis; white-space: nowrap; }
+.dropdown-info h4 { color: #1f2937; font-size: 14px; font-weight: 700; }
+.dropdown-info p { margin-top: 2px; color: #6b7280; font-size: 11px; }
+
+.btn-dropdown-option,
+.btn-dropdown-logout {
+  width: 100%;
+  padding: 9px 12px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: 600;
+  text-align: center;
+  cursor: pointer;
+}
+
+.btn-dropdown-option {
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  text-decoration: none;
+}
+
+.btn-dropdown-logout { border: 0; background: #00bcd4; color: #fff; font-weight: 700; }
+
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 2000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.toast {
+  padding: 14px 18px;
+  border-left: 4px solid #00bcd4;
+  border-radius: 8px;
+  background: #18242c;
+  color: #fff;
+}
+
+.toast.error { border-color: #ff2e88; }
+.toast.success { border-color: #25d366; }
+
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  overflow-y: auto;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+.modal-overlay.active { opacity: 1; pointer-events: auto; }
+
+.auth-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+  padding: 35px 30px;
+  border: 1px solid rgba(255, 46, 136, 0.3);
+  border-radius: 24px;
+  background: rgba(15, 15, 30, 0.98);
+  box-shadow: 0 0 40px rgba(255, 46, 136, 0.25);
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+}
+
+.modal-overlay.active .auth-card { transform: translateY(0); }
+.close-modal { position: absolute; top: 14px; right: 16px; border: 0; background: transparent; color: #aaa; font-size: 24px; cursor: pointer; }
+.auth-header { margin-bottom: 20px; text-align: center; }
+.auth-header h2 { color: #fff; font-size: 24px; }
+.auth-header p { margin-top: 6px; color: #aaa; font-size: 13px; }
+.auth-form { width: 100%; }
+.form-group { position: relative; margin-bottom: 14px; }
+.form-group label { display: block; margin-bottom: 6px; color: #bbb; font-size: 12px; font-weight: 600; }
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-icon { position: absolute; left: 14px; color: #888; pointer-events: none; }
+.form-group input { width: 100%; min-height: 44px; padding: 12px 42px; border: 1px solid rgba(255,255,255,.15); border-radius: 12px; outline: none; background: rgba(255,255,255,.04); color: #fff; font-size: 14px; }
+.form-group input:focus { border-color: #00bcd4; }
+.toggle-password { position: absolute; right: 8px; min-width: 36px; min-height: 36px; border: 0; background: transparent; color: #aaa; cursor: pointer; }
+.terms-group { display: flex; align-items: flex-start; gap: 8px; margin: 16px 0; color: #aaa; font-size: 12px; line-height: 1.4; }
+.terms-group input { margin-top: 2px; accent-color: #00bcd4; }
+.terms-group a { color: #00bcd4; }
+.btn-submit-auth, .btn-social-login { display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; min-height: 46px; border-radius: 12px; color: #fff; font-size: 14px; font-weight: 700; cursor: pointer; }
+.btn-submit-auth { border: 0; background: #00bcd4; }
+.btn-social-login { margin-top: 12px; border: 1px solid rgba(255,255,255,.15); background: rgba(255,255,255,.05); }
+.btn-social-login svg { width: 18px; height: 18px; }
+.auth-switch { margin-top: 18px; color: #aaa; font-size: 13px; text-align: center; }
+.auth-switch button { border: 0; background: transparent; color: #00bcd4; font-weight: bold; cursor: pointer; }
+
+/* CONTENEDOR PRINCIPAL DETALLE */
+.detail-container {
+  max-width: 1250px;
+  margin: 30px auto;
+  padding: 0 20px;
+}
+
+.back-link {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 14px;
+  display: inline-block;
+  margin-bottom: 20px;
+  transition: 0.3s;
+}
+.back-link:hover { color: #ff2e88; }
+
+.uploader-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 25px;
+}
+
+.avatar {
+  width: 40px;
+  height: 40px;
+  background: var(--surface-color);
+  border: 1px solid #ff2e88;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  color: #ff2e88;
+}
+
+.uploader-text span {
+  display: block;
+  font-size: 11px;
+  color: #888;
+}
+text
+.uploader-text strong {
+  font-size: 14px;
+  color: var(--text-color);
+}
+
+/* LAYOUT DOS COLUMNAS */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 380px;
+  gap: 30px;
+}
+
+/* COLUMNA IZQUIERDA: PREVIEW */
+.title-section h1 {
+  font-size: 32px;
+  font-weight: 800;
+  margin-bottom: 5px;
+}
+
+.badge-tag {
+  color: #25d366;
+  font-weight: bold;
+  font-size: 15px;
+  margin-bottom: 20px;
+  display: inline-block;
+}
+
+.preview-box {
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  background: #000;
+  position: relative;
+}
+
+.preview-box img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+}
+
+/* COLUMNA DERECHA: SIDEBAR DE ACCIONES */
+.action-sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* WIDGET DE ESTADÍSTICAS */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.stat-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 15px 10px;
+  text-align: center;
+  backdrop-filter: blur(10px);
+}
+
+.stat-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  margin: 0 auto 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+}
+
+.icon-blue { background: rgba(0, 188, 212, 0.2); color: #00bcd4; }
+.icon-green { background: rgba(37, 211, 102, 0.2); color: #25d366; }
+.icon-purple { background: rgba(255, 46, 136, 0.2); color: #ff2e88; }
+
+.stat-value {
+  font-weight: bold;
+  font-size: 15px;
+  display: block;
+}
+
+.stat-label {
+  font-size: 10px;
+  color: var(--text-muted);
+  text-transform: uppercase;
+}
+
+/* BOTONES DE DESCARGA Y ACCIONES */
+.btn-action-main {
+  width: 100%;
+  padding: 14px;
+  border-radius: 12px;
+  border: none;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.btn-cyan {
+  background: #00bcd4;
+  color: white;
+}
+.btn-cyan:hover {
+  box-shadow: 0 0 20px rgba(0, 188, 212, 0.5);
+}
+
+.btn-outline {
+  background: transparent;
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+}
+.btn-outline:hover {
+  border-color: #ff2e88;
+  color: #ff2e88;
+}
+
+.button-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.btn-secondary {
+  padding: 10px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  color: var(--text-color);
+  font-size: 12px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.btn-gold {
+  background: linear-gradient(90deg, #ffe57f, #ffd54f);
+  color: #333;
+  font-weight: bold;
+  border: none;
+  border-radius: 12px;
+  padding: 12px;
+  cursor: pointer;
+  width: 100%;
+}
+
+/* TARJETAS DE PERSONALIZACIÓN Y TUTORIAL */
+.info-card {
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+  padding: 20px;
+  text-align: center;
+}
+
+.info-card h4 {
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.info-card p {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-bottom: 15px;
+}
+
+.video-placeholder {
+  width: 100%;
+  height: 180px;
+  background: #111;
+  border-radius: 12px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  overflow: hidden;
+}
+
+.play-btn {
+  width: 50px;
+  height: 35px;
+  background: #ff0000;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 18px;
+  box-shadow: 0 0 15px rgba(255, 0, 0, 0.5);
+}
+
+.btn-ws {
+  background: #25d366;
+  color: white;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 10px auto;
+  font-size: 24px;
+  text-decoration: none;
+  box-shadow: 0 0 15px rgba(37, 211, 102, 0.4);
+}
+
+.social-btns {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+}
+
+.btn-social {
+  padding: 8px 16px;
+  border-radius: 20px;
+  background: var(--surface-color);
+  border: 1px solid var(--border-color);
+  color: var(--text-color);
+  font-size: 12px;
+  text-decoration: none;
+}
+
+/* FOOTER */
+footer {
+  background: var(--footer-color);
+  border-top: 1px solid var(--border-color);
+  padding: 50px 40px 30px;
+  margin-top: 80px;
+}
+
+.footer-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.footer-brand { max-width: 320px; }
+.footer-brand p { color: #888; font-size: 13px; margin-top: 12px; }
+.footer-links h4 { font-size: 15px; color: var(--text-color); margin-bottom: 15px; }
+.footer-links ul { list-style: none; }
+.footer-links li { margin-bottom: 10px; }
+.footer-links a { color: #888; text-decoration: none; font-size: 13px; }
+.footer-bottom {
+  text-align: center;
+  color: #666;
+  font-size: 12px;
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+@media(max-width: 900px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
+@media(max-width: 768px) {
+  nav { flex-direction: column; gap: 12px; padding: 12px; }
+  .nav-left { width: 100%; justify-content: space-between; gap: 12px; }
+  .nav-right { width: 100%; margin-left: 0; justify-content: flex-end; gap: 8px; }
+  .theme-lang-group { width: 100%; justify-content: flex-end; margin: 0; }
+  .nav-right > .nav-btn { min-height: 42px; flex: 0 0 auto; text-align: center; }
+  .nav-account-slot { margin: 0 0 0 auto; }
+  .nav-account-slot.guest-mode { flex: 0 0 auto; justify-content: flex-end; }
+  .nav-account-slot.guest-mode #guestAuthControls { justify-content: flex-end; }
+  .nav-user-slot { position: relative; top: auto; right: auto; transform: none; }
+  .nav-btn, .btn-icon-theme, .lang-select-dropdown { min-height: 42px; }
+  .detail-container { margin-top: 22px; padding: 0 16px; }
+  .auth-card { max-height: calc(100vh - 24px); overflow-y: auto; padding: 30px 20px; }
+  .toast-container { top: 12px; right: 12px; left: 12px; }
+}
+
+@media(max-width: 480px) {
+  .logo { gap: 7px; font-size: 17px; }
+  .logo img { width: 34px; height: 34px; }
+  .btn-nav-action { padding: 8px 11px; font-size: 12px; }
+  .nav-right > .nav-btn { padding-right: 9px; padding-left: 9px; font-size: 12px; }
+  .detail-container { padding: 0 12px; }
+  .title-section h1 { font-size: 28px; }
+}
+
+/* ===== ANTI-PARPADEO DE SESIÓN ===== */
+/* Sin pista de sesión: se reserva el espacio exacto de los botones de invitado (invisibles) */
+.nav-account-slot.auth-pending { flex-basis: auto; }
+.nav-account-slot.auth-pending #guestAuthControls { display: flex; }
+@media (max-width: 768px) {
+  .nav-account-slot.auth-pending { flex: 0 0 auto; }
+}
+/* Con pista de sesión: se reserva y muestra directamente el espacio del avatar */
+html.assume-logged-in .nav-account-slot.auth-pending {
+  visibility: visible;
+  flex-basis: 38px;
+}
+html.assume-logged-in .nav-account-slot.auth-pending #guestAuthControls {
+  display: none;
+}
+html.assume-logged-in .nav-account-slot.auth-pending #navUserSlot {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<div id="toastContainer" class="toast-container" aria-live="polite"></div>
+<canvas id="galaxy"></canvas>
+
+<!-- NAVBAR -->
+<nav>
+  <div class="nav-left">
+    <a href="index.html" class="logo">
+      <img src="logo.png.jpeg" alt="Logo">
+      LOVE CODE
+    </a>
+    <a href="index.html#catalogo" class="btn-nav-action" data-nav-i18n="explore">🔍 Explorar</a>
+  </div>
+
+  <div class="nav-right" id="navAuthArea">
+    <div class="theme-lang-group">
+      <button id="btnThemeToggle" class="btn-icon-theme" type="button" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <div class="lang-selector-wrapper">
+        <span class="lang-icon">文A</span>
+        <span data-nav-i18n="language">Idioma</span>
+        <select id="langSelect" class="lang-select-dropdown" onchange="changeLanguage(this.value)">
+          <option value="es">Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+
+    <a href="index.html#donar" class="nav-btn btn-donar" data-nav-i18n="donate">Donar</a>
+    <a href="index.html#miembro" class="nav-btn btn-miembro" data-nav-i18n="member">Ser Miembro</a>
+    <a href="#" onclick="abrirReporteWhatsApp(event)" class="nav-btn btn-reportar" data-nav-i18n="report">💬 Reportar</a>
+
+    <div class="nav-account-slot auth-pending" id="navAccountSlot">
+      <div id="guestAuthControls">
+        <button type="button" class="nav-btn btn-login" onclick="openAuthModal('login')" data-nav-i18n="login">Iniciar sesión</button>
+        <button type="button" class="nav-btn btn-register" onclick="openAuthModal('register')" data-nav-i18n="register">Registrarse</button>
+      </div>
+      <div class="nav-user-slot" id="navUserSlot" hidden>
+        <div class="user-menu-wrapper">
+          <button type="button" class="user-avatar-btn" id="navUserAvatar" onclick="toggleUserDropdown()" title="Perfil" aria-label="Abrir menú de usuario" aria-expanded="false">
+            <span id="navUserInitial">J</span>
+          </button>
+          <div class="user-dropdown" id="userDropdown">
+            <div class="dropdown-header">
+              <div class="dropdown-avatar" id="dropdownAvatar">J</div>
+              <div class="dropdown-info">
+                <h4 id="dropdownUserName">Cargando usuario...</h4>
+                <p id="dropdownUserEmail"></p>
+              </div>
+            </div>
+            <a href="perfil.html" class="btn-dropdown-option" data-nav-i18n="profile">Perfil</a>
+            <button type="button" class="btn-dropdown-logout" onclick="logoutUser()" data-nav-i18n="logout">Cerrar sesión</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+// Idiomas de la barra (definido aquí para aplicarlo antes del primer pintado)
+const navTranslations = {
+  es: { explore: "🔍 Explorar", language: "Idioma", donate: "Donar", member: "Ser Miembro", report: "💬 Reportar", login: "Iniciar sesión", register: "Registrarse", profile: "Perfil", logout: "Cerrar sesión" },
+  en: { explore: "🔍 Explore", language: "Language", donate: "Donate", member: "Become Member", report: "💬 Report", login: "Log In", register: "Register", profile: "Profile", logout: "Log Out" }
+};
+
+// Aplica idioma y icono de tema guardados de inmediato, para que los botones no cambien de tamaño al cargar
+try {
+  var savedLang = localStorage.getItem('langPreference');
+  if (savedLang && navTranslations[savedLang]) {
+    document.documentElement.lang = savedLang;
+    document.querySelectorAll('[data-nav-i18n]').forEach(function (el) {
+      var t = navTranslations[savedLang][el.dataset.navI18n];
+      if (t) el.textContent = t;
+    });
+    document.getElementById('langSelect').value = savedLang;
+  }
+  document.getElementById('btnThemeToggle').textContent =
+    localStorage.getItem('themePreference') === 'light' ? '☀️' : '🌙';
+} catch (error) {}
+
+// Rellena el menú de usuario con los datos guardados (evita ver "J" / "Cargando usuario..." un instante)
+try {
+  var hint = JSON.parse(localStorage.getItem('authHint') || 'null');
+  if (hint) {
+    var paint = function (el, size) {
+      if (!el) return;
+      el.replaceChildren();
+      if (hint.photo) {
+        var img = document.createElement('img');
+        img.src = hint.photo;
+        img.alt = hint.name || '';
+        el.appendChild(img);
+      } else {
+        var s = document.createElement('span');
+        s.textContent = hint.initial || '';
+        s.style.fontSize = size;
+        el.appendChild(s);
+      }
+    };
+    paint(document.getElementById('navUserAvatar'), '16px');
+    paint(document.getElementById('dropdownAvatar'), '20px');
+    var nm = document.getElementById('dropdownUserName');
+    var em = document.getElementById('dropdownUserEmail');
+    if (nm && hint.name) nm.textContent = hint.name;
+    if (em && hint.email) { em.textContent = hint.email; em.title = hint.email; }
+  }
+} catch (error) {}
+</script>
+
+<div class="modal-overlay" id="authModal" onclick="if (event.target === this) closeAuthModal()">
+  <div class="auth-card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <button type="button" class="close-modal" onclick="closeAuthModal()" aria-label="Cerrar">&times;</button>
+    <div class="auth-header">
+      <h2 id="modalTitle">Crear cuenta</h2>
+      <p id="modalSub">Únete a nuestra comunidad de desarrolladores</p>
+    </div>
+    <form class="auth-form" id="authForm" onsubmit="handleAuthSubmit(event)">
+      <div class="form-group" id="groupName">
+        <label for="authName">Nombre completo</label>
+        <div class="input-wrapper"><span class="input-icon">👤</span><input type="text" id="authName" autocomplete="name" placeholder="Nombre completo"></div>
+      </div>
+      <div class="form-group">
+        <label for="authEmail">Correo electrónico</label>
+        <div class="input-wrapper"><span class="input-icon">✉️</span><input type="email" id="authEmail" autocomplete="username" placeholder="tu@email.com" required></div>
+      </div>
+      <div class="form-group">
+        <label for="authPassword">Contraseña</label>
+        <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="authPassword" autocomplete="new-password" placeholder="••••••••" required><button type="button" class="toggle-password" onclick="togglePasswordVisibility('authPassword', this)" aria-label="Mostrar contraseña">👁️</button></div>
+      </div>
+      <div class="form-group" id="groupConfirmPassword">
+        <label for="authConfirmPassword">Confirmar contraseña</label>
+        <div class="input-wrapper"><span class="input-icon">🔒</span><input type="password" id="authConfirmPassword" autocomplete="new-password" placeholder="••••••••"><button type="button" class="toggle-password" onclick="togglePasswordVisibility('authConfirmPassword', this)" aria-label="Mostrar confirmación">👁️</button></div>
+      </div>
+      <div class="terms-group" id="groupTerms">
+        <input type="checkbox" id="authTerms">
+        <label for="authTerms">Acepto los <a href="index.html#terminos">términos y condiciones</a> y la política de privacidad</label>
+      </div>
+      <button type="submit" class="btn-submit-auth"><span id="btnSubmitText">Crear cuenta</span></button>
+      <button type="button" class="btn-social-login" onclick="loginWithGoogle()"><span aria-hidden="true">G</span><span id="btnGoogleText">Registrarse con Google</span></button>
+      <div class="auth-switch"><span id="switchText">¿Ya tienes cuenta?</span> <button type="button" id="btnSwitchMode" onclick="toggleAuthMode()">Inicia sesión</button></div>
+    </form>
+  </div>
+</div>
+
+<!-- CONTENIDO PRINCIPAL -->
+<div class="detail-container">
+  <a href="index.html" class="back-link">← Volver al listado</a>
+
+  <div class="uploader-info">
+    <div class="avatar">ST</div>
+    <div class="uploader-text">
+      <span>Subido por</span>
+      <strong>Steven2005</strong>
+    </div>
+  </div>
+
+  <div class="detail-grid">
+    
+    <!-- COLUMNA IZQUIERDA (PREVIEW Y DETALLES) -->
+    <div>
+      <div class="title-section">
+        <h1>Galaxia Azul Hot Wheels</h1>
+        <span class="badge-tag">• Gratis</span>
+      </div>
+
+      <div class="preview-box">
+        <!-- Reemplaza con la imagen real del preview -->
+        <img src="Hot_Wh.jpg" alt="Galaxia Azul Hot Wheels Preview">
+      </div>
+    </div>
+
+    <!-- COLUMNA DERECHA (ESTADÍSTICAS Y ACCIONES) -->
+    <div class="action-sidebar">
+      
+      <!-- ESTADÍSTICAS -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-icon icon-blue">📅</div>
+          <span class="stat-value">Hace 1 dìa</span>
+          <span class="stat-label">Publicado</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-green">📥</div>
+          <span class="stat-value">0</span>
+          <span class="stat-label">Descargas</span>
+        </div>
+        <div class="stat-card">
+          <div class="stat-icon icon-purple">❤️</div>
+          <span class="stat-value">0</span>
+          <span class="stat-label">Likes</span>
+        </div>
+      </div>
+
+      <!-- BOTONES DE ACCIÓN PRINCIPALES -->
+      <a href="Galaxia_Wheels.html" target="" class="btn-action-main btn-cyan"> 👁️ Ver archivo (Demo)</a>
+
+      <button class="btn-action-main btn-outline">
+        📥 Descargar gratis
+      </button>
+
+      <div class="button-row">
+        <button class="btn-secondary">🔗 Copiar enlace</button>
+        <button class="btn-secondary">🔗 Compartir</button>
+      </div>
+
+      <button class="btn-secondary" style="width: 100%;">📊 Generar QR (VIP)</button>
+
+      <button class="btn-gold">
+        📄 Personalizar ahora desde la web
+      </button>
+
+      <!-- SECCIÓN VIDEO TUTORIAL -->
+      <div class="info-card">
+        <h4>Cómo editar música e imagen de un archivo</h4>
+        <p>Preview del video disponible.</p>
+        <div class="video-placeholder">
+          <div class="play-btn">▶</div>
+        </div>
+      </div>
+
+      <!-- SECCIÓN PERSONALIZACIÓN PERSONALIZADA -->
+      <div class="info-card">
+        <h4>¿Deseas que yo te personalice un archivo?</h4>
+        <p>Con mucho gusto</p>
+        <a href="https://wa.me/" class="btn-ws">💬</a>
+        <p style="font-size: 10px; color: #666; margin-top: 5px;">(no es gratis)</p>
+      </div>
+
+      <!-- APOYO -->
+      <div class="info-card">
+        <h4>Apóyame en</h4>
+        <div class="social-btns">
+          <a href="#" class="btn-social">Facebook</a>
+          <a href="#" class="btn-social">TikTok</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <a href="index.html" class="logo">
+        <img src="logo.png.jpeg" alt="Logo">
+        LOVE CODE
+      </a>
+      <p>La mejor plataforma para descubrir y compartir plantillas HTML de alta calidad. Desde templates gratuitos hasta diseños premium exclusivos.</p>
+    </div>
+
+    <div class="footer-links">
+      <h4>Plataforma</h4>
+      <ul>
+        <li><a href="index.html#catalogo">Explorar archivos</a></li>
+        <li><a href="#contacto">Subir archivo</a></li>
+        <li><a href="#vip">Planes VIP</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h4>Soporte</h4>
+      <ul>
+        <li><a href="#login">Iniciar sesión</a></li>
+        <li><a href="https://wa.me/">Soporte técnico</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="footer-bottom">
+    © 2026 LOVE CODE. Todos los derechos reservados.
+  </div>
+</footer>
+
+<script>
+function changeLanguage(language) {
+  const selectedLanguage = navTranslations[language] ? language : "es";
+  localStorage.setItem("langPreference", selectedLanguage);
+  document.documentElement.lang = selectedLanguage;
+  document.querySelectorAll("[data-nav-i18n]").forEach((element) => {
+    element.textContent = navTranslations[selectedLanguage][element.dataset.navI18n];
+  });
+  document.getElementById("langSelect").value = selectedLanguage;
+}
+
+function toggleTheme() {
+  const isLight = !document.body.classList.contains("light-mode");
+  document.body.classList.toggle("light-mode", isLight);
+  document.documentElement.classList.toggle("light-mode", isLight);
+  document.getElementById("btnThemeToggle").textContent = isLight ? "☀️" : "🌙";
+  localStorage.setItem("themePreference", isLight ? "light" : "dark");
+}
+
+function abrirReporteWhatsApp(event) {
+  event.preventDefault();
+  const phone = "593980264652";
+  const message = encodeURIComponent("Hola, necesito ayuda con LOVE CODE");
+  window.open(`https://api.whatsapp.com/send?phone=${phone}&text=${message}`, "_blank", "noopener");
+}
+
+window.currentAuthMode = "register";
+
+function setAuthMode(mode) {
+  window.currentAuthMode = mode;
+  const isRegister = mode === "register";
+  document.getElementById("modalTitle").textContent = isRegister ? "Crear cuenta" : "Iniciar sesión";
+  document.getElementById("modalSub").textContent = isRegister ? "Únete a nuestra comunidad de desarrolladores" : "Bienvenido de nuevo a LOVE CODE";
+  document.getElementById("btnSubmitText").textContent = isRegister ? "Crear cuenta" : "Iniciar sesión";
+  document.getElementById("btnGoogleText").textContent = isRegister ? "Registrarse con Google" : "Iniciar con Google";
+  document.getElementById("switchText").textContent = isRegister ? "¿Ya tienes cuenta?" : "¿No tienes cuenta?";
+  document.getElementById("btnSwitchMode").textContent = isRegister ? "Inicia sesión" : "Regístrate";
+  document.getElementById("groupName").style.display = isRegister ? "block" : "none";
+  document.getElementById("groupConfirmPassword").style.display = isRegister ? "block" : "none";
+  document.getElementById("groupTerms").style.display = isRegister ? "flex" : "none";
+  document.getElementById("authName").required = isRegister;
+  document.getElementById("authConfirmPassword").required = isRegister;
+  document.getElementById("authPassword").autocomplete = isRegister ? "new-password" : "current-password";
+}
+
+function toggleAuthMode() {
+  setAuthMode(window.currentAuthMode === "register" ? "login" : "register");
+}
+
+function openAuthModal(mode) {
+  setAuthMode(mode);
+  document.getElementById("authModal").classList.add("active");
+}
+
+function closeAuthModal() {
+  document.getElementById("authModal").classList.remove("active");
+}
+
+function togglePasswordVisibility(inputId, button) {
+  const input = document.getElementById(inputId);
+  const showPassword = input.type === "password";
+  input.type = showPassword ? "text" : "password";
+  button.textContent = showPassword ? "🙈" : "👁️";
+}
+
+document.addEventListener("DOMContentLoaded", () => {
+  const savedTheme = localStorage.getItem("themePreference");
+  const isLight = savedTheme === "light";
+  document.body.classList.toggle("light-mode", isLight);
+  document.documentElement.classList.toggle("light-mode", isLight);
+  document.getElementById("btnThemeToggle").textContent = isLight ? "☀️" : "🌙";
+  document.getElementById("langSelect").value = localStorage.getItem("langPreference") || "es";
+  changeLanguage(document.getElementById("langSelect").value);
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => document.documentElement.classList.remove("theme-initializing"));
+  });
+});
+
+document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    closeAuthModal();
+    document.getElementById("userDropdown").classList.remove("active");
+    document.getElementById("navUserAvatar").setAttribute("aria-expanded", "false");
+  }
+});
+
+(function () {
+const c = document.getElementById('galaxy'), x = c.getContext('2d');
+c.width = window.innerWidth;
+c.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+});
+
+let stars = [];
+for(let i = 0; i < 300; i++) {
+  stars.push({
+    x: Math.random() * c.width,
+    y: Math.random() * c.height,
+    r: Math.random() * 1.5,
+    s: Math.random() * 0.5
+  });
+}
+function draw() {
+  const isLightTheme = document.documentElement.classList.contains('light-mode') ||
+    document.body.classList.contains('light-mode');
+  if (isLightTheme) {
+    x.clearRect(0, 0, c.width, c.height);
+  } else {
+    x.fillStyle = '#050510';
+    x.fillRect(0, 0, c.width, c.height);
+
+    const galaxyGlow = x.createRadialGradient(c.width * 0.3, c.height * 0.3, 0, c.width * 0.3, c.height * 0.3, 500);
+    galaxyGlow.addColorStop(0, 'rgba(255, 46, 136, 0.25)');
+    galaxyGlow.addColorStop(1, 'transparent');
+    x.fillStyle = galaxyGlow;
+    x.fillRect(0, 0, c.width, c.height);
+  }
+
+  stars.forEach(s => {
+    x.beginPath();
+    x.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    x.fillStyle = isLightTheme ? '#7e22ce' : 'white';
+    x.fill();
+    s.y += s.s;
+    if(s.y > c.height) {
+      s.y = 0;
+      s.x = Math.random() * c.width;
+    }
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+})();
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import {
+    initializeAuth,
+    browserPopupRedirectResolver,
+    GoogleAuthProvider,
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile,
+    setPersistence,
+    browserLocalPersistence,
+    signOut,
+    signInAnonymously,
+    onAuthStateChanged
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getDatabase, ref, push, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzNwu1mayHRxyKMgHLDv7XSY47o00_TX4",
+    authDomain: "love-code-proyecto.firebaseapp.com",
+    projectId: "love-code-proyecto",
+    storageBucket: "love-code-proyecto.firebasestorage.app",
+    messagingSenderId: "668944314266",
+    appId: "1:668944314266:web:ec491ba279be1d771dd423",
+    measurementId: "G-QDRLTRCVT5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  // Misma persistencia (localStorage) en todas las páginas y pestañas: la sesión sobrevive a las recargas
+  const auth = initializeAuth(app, {
+    persistence: browserLocalPersistence,
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+  const googleProvider = new GoogleAuthProvider();
+  googleProvider.setCustomParameters({ prompt: "select_account" });
+
+  function showToast(message, type = "info") {
+    const toast = document.createElement("div");
+    toast.className = `toast ${type}`;
+    toast.textContent = message;
+    document.getElementById("toastContainer").appendChild(toast);
+    window.setTimeout(() => toast.remove(), 4000);
+  }
+
+  window.handleAuthSubmit = async (event) => {
+    event.preventDefault();
+    const email = document.getElementById("authEmail").value.trim();
+    const password = document.getElementById("authPassword").value;
+
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      if (window.currentAuthMode === "register") {
+        const name = document.getElementById("authName").value.trim();
+        if (password !== document.getElementById("authConfirmPassword").value) {
+          showToast("Las contraseñas no coinciden.", "error");
+          return;
+        }
+        if (!document.getElementById("authTerms").checked) {
+          showToast("Debes aceptar los términos y condiciones.", "error");
+          return;
+        }
+        const credential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(credential.user, { displayName: name });
+        showToast("¡Cuenta creada exitosamente!", "success");
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast("Sesión iniciada correctamente.", "success");
+      }
+      closeAuthModal();
+    } catch (error) {
+      console.error("Error de autenticación:", error);
+      showToast("No se pudo completar el acceso. Revisa tus datos e inténtalo de nuevo.", "error");
+    }
+  };
+
+  window.loginWithGoogle = async () => {
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      await signInWithPopup(auth, googleProvider);
+      closeAuthModal();
+      showToast("Sesión iniciada con Google.", "success");
+    } catch (error) {
+      console.error("Error al iniciar con Google:", error);
+      if (error.code !== "auth/popup-closed-by-user") showToast("No se pudo conectar con Google.", "error");
+    }
+  };
+
+  window.toggleUserDropdown = () => {
+    const dropdown = document.getElementById("userDropdown");
+    const avatarButton = document.getElementById("navUserAvatar");
+    const isOpen = dropdown.classList.toggle("active");
+    avatarButton.setAttribute("aria-expanded", String(isOpen));
+  };
+
+  document.addEventListener("click", (event) => {
+    const wrapper = document.querySelector(".user-menu-wrapper");
+    const dropdown = document.getElementById("userDropdown");
+    if (wrapper && dropdown && !wrapper.contains(event.target)) {
+      dropdown.classList.remove("active");
+      document.getElementById("navUserAvatar").setAttribute("aria-expanded", "false");
+    }
+  });
+
+  window.logoutUser = async () => {
+    try {
+      await stopPresence();
+      await signOut(auth);
+      showToast("Has cerrado sesión.", "info");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      showToast("No se pudo cerrar la sesión.", "error");
+    }
+  };
+
+  function renderAccountSlot(user) {
+    const accountSlot = document.getElementById("navAccountSlot");
+    const userSlot = document.getElementById("navUserSlot");
+    if (!user) {
+      try { localStorage.removeItem("authHint"); } catch (error) {}
+      document.documentElement.classList.remove("assume-logged-in");
+      userSlot.hidden = true;
+      accountSlot.classList.add("guest-mode");
+      accountSlot.classList.remove("auth-pending");
+      return;
+    }
+
+    const name = user.displayName || user.email?.split("@")[0] || "Usuario";
+    const initial = name.charAt(0).toUpperCase();
+    const renderAvatar = (element, size) => {
+      element.replaceChildren();
+      if (user.photoURL) {
+        const image = document.createElement("img");
+        image.src = user.photoURL;
+        image.alt = name;
+        element.appendChild(image);
+      } else {
+        const initialElement = document.createElement("span");
+        initialElement.textContent = initial;
+        initialElement.style.fontSize = size;
+        element.appendChild(initialElement);
+      }
+    };
+
+    renderAvatar(document.getElementById("navUserAvatar"), "16px");
+    renderAvatar(document.getElementById("dropdownAvatar"), "20px");
+    document.getElementById("dropdownUserName").textContent = name;
+    document.getElementById("dropdownUserEmail").textContent = user.email || "";
+    document.getElementById("dropdownUserEmail").title = user.email || "";
+    try {
+      localStorage.setItem("authHint", JSON.stringify({
+        name: name,
+        email: user.email || "",
+        initial: initial,
+        photo: user.photoURL || ""
+      }));
+    } catch (error) {}
+    document.documentElement.classList.remove("assume-logged-in");
+    userSlot.hidden = false;
+    accountSlot.classList.remove("guest-mode");
+    accountSlot.classList.remove("auth-pending");
+  }
+
+  // ===== PRESENCIA EN LÍNEA: cuenta usuarios registrados y visitantes =====
+  let presenceDb = null;
+  try { presenceDb = getDatabase(app); } catch (error) { console.error("Realtime Database no disponible:", error); }
+  let stopPresence = async () => {};
+
+  function startPresence(user) {
+    if (!presenceDb) return;
+    const entries = [{ r: push(ref(presenceDb, "presence")), v: { uid: user.uid, anon: user.isAnonymous } }];
+    if (!user.isAnonymous) {
+      const name = user.displayName || user.email?.split("@")[0] || "Usuario";
+      entries.push({ r: push(ref(presenceDb, `onlineUsers/${user.uid}`)), v: { name } });
+    }
+    const off = onValue(ref(presenceDb, ".info/connected"), async (snap) => {
+      if (snap.val() !== true) return;
+      try {
+        for (const { r, v } of entries) {
+          await onDisconnect(r).remove();
+          await set(r, v);
+        }
+      } catch (error) {
+        console.error("No se pudo actualizar la presencia:", error);
+      }
+    });
+    stopPresence = async () => {
+      off();
+      entries.forEach(({ r }) => remove(r).catch(() => {})); // sin esperar: la limpieza nunca debe bloquear nada
+      stopPresence = async () => {};
+    };
+  }
+
+  // Cada visitante sin cuenta recibe una sesión anónima para poder contarlo
+  function handlePresence(firebaseUser) {
+    stopPresence();
+    if (!firebaseUser) {
+      // Se espera un momento: si otra pestaña está iniciando sesión, no se crea una sesión anónima encima
+      setTimeout(() => {
+        if (!auth.currentUser) {
+          signInAnonymously(auth).catch((error) => console.error("Inicio de sesión anónimo no disponible:", error));
+        }
+      }, 2000);
+      return;
+    }
+    startPresence(firebaseUser);
+  }
+
+  onAuthStateChanged(auth, (firebaseUser) => {
+    handlePresence(firebaseUser);
+    // Las sesiones anónimas (visitantes) se tratan como "sin sesión" en la barra
+    renderAccountSlot(firebaseUser && !firebaseUser.isAnonymous ? firebaseUser : null);
+  });
+</script>
+</body>
+</html>

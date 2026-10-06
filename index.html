@@ -1,0 +1,2492 @@
+<!DOCTYPE html>
+<html lang="es" class="auth-pending">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LOVE CODE - Plantillas HTML Románticas e Interactivas</title>
+<!-- Anti-parpadeo: si la última vez había sesión, asumimos sesión hasta que Firebase confirme -->
+<script>
+  try {
+    if (localStorage.getItem('authHint')) {
+      document.documentElement.classList.add('assume-logged-in');
+    }
+  } catch (e) {}
+  // Seguro: si Firebase no responde en 4s, se muestra el estado de invitado
+  setTimeout(function () {
+    document.documentElement.classList.remove('auth-pending');
+  }, 4000);
+</script>
+<style>
+/* VARIABLES CSS - MODO OSCURO (POR DEFECTO) */
+:root {
+  --bg-color: #050510;
+  --text-color: #ffffff;
+  --text-muted: #aaaaaa;
+  --nav-bg: rgba(5, 5, 16, 0.85);
+  --card-bg: #ffffff;
+  --card-text: #1f2937;
+  --card-p-text: #6b7280;
+  --footer-bg: rgba(5, 5, 12, 0.95);
+  --border-color: rgba(255, 255, 255, 0.15);
+  --input-bg: rgba(255, 255, 255, 0.95);
+  --input-text: #333333;
+}
+
+/* VARIABLES CSS - MODO CLARO */
+body.light-mode {
+  --bg-color: #ffffff;
+  --text-color: #111827;
+  --text-muted: #4b5563;
+  --nav-bg: rgba(255, 255, 255, 0.9);
+  --card-bg: #ffffff;
+  --card-text: #111827;
+  --card-p-text: #4b5563;
+  --footer-bg: #1f2937;
+  --border-color: rgba(0, 0, 0, 0.12);
+  --input-bg: #ffffff;
+  --input-text: #111827;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  scroll-behavior: smooth;
+}
+
+body {
+  isolation: isolate;
+  background: var(--bg-color);
+  color: var(--text-color);
+  overflow-x: hidden;
+}
+
+html { background-color: #050510; }
+html.light-mode { background-color: #ffffff; }
+
+html.theme-initializing *,
+html.theme-initializing *::before,
+html.theme-initializing *::after {
+  transition: none !important;
+}
+
+/* CANVAS FONDO GALAXIA */
+canvas#galaxy {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: -1;
+  width: 100vw;
+  height: 100vh;
+}
+
+body.light-mode canvas#galaxy,
+html.light-mode canvas#galaxy { opacity: 1; }
+
+/* NAVBAR CORREGIDA */
+nav {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 24px;
+  background: var(--nav-bg);
+  backdrop-filter: blur(15px);
+  border-bottom: 1px solid rgba(255, 46, 136, 0.2);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  transition: background 0.4s ease;
+  width: 100%;
+}
+
+.nav-left {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 900;
+  letter-spacing: 1px;
+  font-size: 20px;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.logo img {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  box-shadow: 0 0 12px #ff2e88;
+}
+
+.btn-nav-action {
+  background: #00bcd4;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 10px;
+  font-weight: bold;
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.btn-nav-action:hover {
+  filter: brightness(1.2);
+  box-shadow: 0 0 15px rgba(0, 188, 212, 0.6);
+}
+
+/* ALINEACIÓN A LA DERECHA */
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-left: auto;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.theme-lang-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 6px;
+}
+
+.btn-icon-theme {
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  cursor: pointer;
+  padding: 6px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-color);
+  transition: background 0.3s ease, transform 0.2s ease;
+}
+
+.btn-icon-theme:hover {
+  background: rgba(255, 255, 255, 0.1);
+  transform: scale(1.1);
+}
+
+.lang-selector-wrapper {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.lang-selector-wrapper .lang-icon {
+  font-size: 16px;
+}
+
+.lang-select-dropdown {
+  background: rgba(255, 255, 255, 0.95);
+  color: #1f2937;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  outline: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: 0.3s;
+}
+
+.lang-select-dropdown:hover {
+  border-color: #00bcd4;
+}
+
+.nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 8px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  border: none;
+  text-decoration: none;
+  transition: 0.3s;
+}
+
+.btn-donar { background: #00bcd4; color: white; }
+.btn-miembro { background: #d4a373; color: white; }
+.btn-reportar { background: #25d366; color: white; }
+.btn-login { background: transparent; color: var(--text-color); border: 1px solid var(--border-color); }
+.btn-register { background: #00bcd4; color: white; }
+
+.nav-btn:hover {
+  filter: brightness(1.15);
+}
+
+/* HERO SECTION */
+.hero {
+  text-align: center;
+  padding: 60px 20px 30px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.hero h1 {
+  font-size: 52px;
+  font-weight: 900;
+  line-height: 1.1;
+  text-transform: uppercase;
+}
+
+.hero h1 span {
+  background: linear-gradient(90deg, #00bcd4, #ff2e88);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  text-shadow: 0 0 30px rgba(0, 188, 212, 0.4);
+}
+
+.hero p {
+  color: var(--text-muted);
+  margin-top: 15px;
+  font-size: 16px;
+}
+
+/* BÚSQUEDA Y FILTROS */
+.search-container {
+  margin: 30px auto 20px;
+  max-width: 550px;
+  position: relative;
+}
+
+.search-input {
+  width: 100%;
+  padding: 14px 20px 14px 45px;
+  border-radius: 30px;
+  border: 1px solid var(--border-color);
+  background: var(--input-bg);
+  color: var(--input-text);
+  font-size: 15px;
+  outline: none;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.search-icon {
+  position: absolute;
+  left: 18px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #777;
+  font-size: 16px;
+}
+
+.categories {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 40px;
+}
+
+.cat-btn {
+  padding: 8px 18px;
+  border-radius: 20px;
+  border: 1px solid var(--border-color);
+  background: rgba(255, 255, 255, 0.9);
+  color: #333;
+  font-size: 13px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.cat-btn.active {
+  background: #00bcd4;
+  color: white;
+  border-color: #00bcd4;
+}
+
+.cat-btn:hover {
+  border-color: #ff2e88;
+  color: #ff2e88;
+}
+
+/* GRID DE PLANTILLAS */
+.grid {
+  max-width: 1200px;
+  margin: auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+  padding: 0 20px 50px;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  position: relative;
+}
+
+.card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.25);
+}
+
+.card-link {
+  text-decoration: none;
+  color: inherit;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  overflow: hidden;
+}
+
+.card-img-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.badge-floating {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  background: #10b981;
+  color: white;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+.badge-floating.premium {
+  background: #ff2e88;
+}
+
+.card .info {
+  padding: 16px 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: var(--card-bg);
+  flex-grow: 1;
+}
+
+.card .info h3 {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--card-text);
+  margin: 0;
+}
+
+.card .info p {
+  font-size: 13px;
+  color: var(--card-p-text);
+  margin: 0;
+  line-height: 1.4;
+}
+
+.card .price-tag {
+  font-size: 13px;
+  font-weight: 700;
+  color: #10b981;
+  margin-top: 6px;
+  display: inline-block;
+}
+
+.card .price-tag.premium {
+  color: #ff2e88;
+}
+
+.load-more-container {
+  text-align: center;
+  margin-bottom: 80px;
+}
+
+.btn-load-more {
+  padding: 12px 30px;
+  background: white;
+  color: #333;
+  border: none;
+  border-radius: 15px;
+  font-weight: bold;
+  cursor: pointer;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+  transition: 0.3s;
+}
+
+.btn-load-more:hover {
+  background: #ff2e88;
+  color: white;
+}
+
+/* FOOTER */
+footer {
+  background: var(--footer-bg);
+  border-top: 1px solid var(--border-color);
+  padding: 50px 40px 30px;
+  margin-top: 50px;
+}
+
+.footer-content {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 40px;
+}
+
+.footer-brand {
+  max-width: 320px;
+}
+
+.footer-brand p {
+  color: var(--text-muted);
+  font-size: 13px;
+  line-height: 1.6;
+  margin-top: 12px;
+}
+
+.footer-links h4 {
+  font-size: 15px;
+  color: white;
+  margin-bottom: 15px;
+}
+
+.footer-links ul {
+  list-style: none;
+}
+
+.footer-links li {
+  margin-bottom: 10px;
+}
+
+.footer-links a {
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 13px;
+  transition: 0.3s;
+}
+
+.footer-links a:hover {
+  color: #ff2e88;
+}
+
+/* MODAL DE AUTENTICACIÓN */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.auth-card {
+  background: rgba(15, 15, 30, 0.95);
+  border: 1px solid rgba(255, 46, 136, 0.3);
+  box-shadow: 0 0 40px rgba(255, 46, 136, 0.25);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 440px;
+  padding: 35px 30px;
+  position: relative;
+  transform: translateY(20px);
+  transition: transform 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.modal-overlay.active .auth-card {
+  transform: translateY(0);
+}
+
+.close-modal {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  background: transparent;
+  border: none;
+  color: #888;
+  font-size: 22px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.close-modal:hover { color: #ff2e88; }
+
+.auth-avatar-icon {
+  width: 56px;
+  height: 56px;
+  background: #00bcd4;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 16px;
+  box-shadow: 0 0 20px rgba(0, 188, 212, 0.4);
+}
+
+.auth-avatar-icon svg {
+  width: 28px;
+  height: 28px;
+  fill: white;
+}
+
+.auth-header {
+  text-align: center;
+  margin-bottom: 22px;
+  width: 100%;
+}
+
+.auth-header h2 {
+  font-size: 24px;
+  font-weight: 800;
+  color: white;
+}
+
+.auth-header p {
+  color: #aaa;
+  font-size: 13px;
+  margin-top: 6px;
+}
+
+.auth-form {
+  width: 100%;
+}
+
+.form-group {
+  margin-bottom: 14px;
+  position: relative;
+}
+
+.form-group label {
+  display: block;
+  font-size: 12px;
+  color: #bbb;
+  margin-bottom: 6px;
+  font-weight: 600;
+}
+
+.input-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.input-icon {
+  position: absolute;
+  left: 14px;
+  color: #777;
+  font-size: 15px;
+  pointer-events: none;
+}
+
+.form-group input {
+  width: 100%;
+  padding: 12px 40px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.04);
+  color: white;
+  font-size: 14px;
+  outline: none;
+  transition: 0.3s;
+}
+
+.form-group input:focus {
+  border-color: #00bcd4;
+  background: rgba(0, 0, 0, 0.5);
+  box-shadow: 0 0 10px rgba(0, 188, 212, 0.2);
+}
+
+.toggle-password {
+  position: absolute;
+  right: 14px;
+  background: transparent;
+  border: none;
+  color: #888;
+  cursor: pointer;
+  font-size: 14px;
+}
+.toggle-password:hover { color: #00bcd4; }
+
+.terms-group {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  margin: 16px 0;
+  font-size: 12px;
+  color: #aaa;
+  line-height: 1.4;
+}
+
+.terms-group input[type="checkbox"] {
+  margin-top: 2px;
+  accent-color: #00bcd4;
+}
+
+.terms-group a {
+  color: #00bcd4;
+  text-decoration: none;
+}
+.terms-group a:hover { text-decoration: underline; }
+
+.btn-submit-auth {
+  width: 100%;
+  padding: 13px;
+  border-radius: 12px;
+  border: none;
+  background: #00bcd4;
+  color: white;
+  font-weight: bold;
+  font-size: 15px;
+  cursor: pointer;
+  transition: 0.3s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  box-shadow: 0 4px 15px rgba(0, 188, 212, 0.3);
+}
+
+.btn-submit-auth:hover {
+  filter: brightness(1.15);
+  box-shadow: 0 6px 20px rgba(0, 188, 212, 0.5);
+}
+
+.btn-social-login {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px;
+  margin-top: 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(255, 255, 255, 0.05);
+  color: white;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: 0.3s;
+}
+
+.btn-social-login:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: #ff2e88;
+}
+
+.btn-social-login svg {
+  width: 18px;
+  height: 18px;
+}
+
+.auth-switch {
+  text-align: center;
+  margin-top: 18px;
+  font-size: 13px;
+  color: #888;
+}
+
+.auth-switch button {
+  background: transparent;
+  border: none;
+  color: #00bcd4;
+  font-weight: bold;
+  cursor: pointer;
+}
+.auth-switch button:hover { text-decoration: underline; }
+
+/* PERFIL Y DROPDOWN - CORREGIDO */
+.user-menu-wrapper {
+  position: relative;
+  display: inline-block;
+}
+
+.nav-account-slot {
+  position: relative;
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  justify-content: flex-end;
+}
+
+.nav-account-slot.auth-pending { 
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+/* Evita destellos durante el reload */
+.nav-account-slot.auth-pending #guestAuthControls {
+  display: none !important;
+}
+
+.nav-account-slot.guest-mode {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+#guestAuthControls {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.nav-account-slot.guest-mode #guestAuthControls {
+  display: flex;
+}
+
+.nav-user-slot {
+  position: relative;
+  top: auto;
+  right: auto;
+  transform: none;
+  display: none; /* Oculto por defecto cuando no hay sesión */
+  align-items: center;
+}
+
+.nav-user-slot[data-visible="true"] {
+  display: flex;
+}
+
+.user-avatar-btn {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  border: 2px solid #ff2e88;
+  background: #ff2e88;
+  color: white;
+  font-weight: bold;
+  font-size: 16px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.user-avatar-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 10px rgba(255, 46, 136, 0.5);
+}
+
+.user-avatar-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.user-dropdown {
+  position: absolute;
+  top: 50px;
+  right: 0;
+  width: 230px;
+  max-width: calc(100vw - 24px);
+  background: #ffffff;
+  border-radius: 16px;
+  padding: 16px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-10px);
+  transition: all 0.25s ease;
+}
+
+.user-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.dropdown-avatar {
+  width: 45px;
+  height: 45px;
+  border-radius: 50%;
+  background: #ff2e88;
+  color: white;
+  font-weight: bold;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.dropdown-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.dropdown-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.dropdown-info h4 {
+  color: #1f2937;
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dropdown-info p {
+  color: #6b7280;
+  font-size: 11px;
+  margin: 2px 0 0 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.btn-dropdown-option {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  color: #374151;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  text-align: center;
+  transition: 0.2s;
+  text-decoration: none;
+}
+
+.btn-dropdown-option:hover {
+  background: #f3f4f6;
+}
+
+.btn-dropdown-logout {
+  width: 100%;
+  padding: 10px;
+  border-radius: 10px;
+  border: none;
+  background: #00bcd4;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+.btn-dropdown-logout:hover {
+  background: #00acc1;
+  box-shadow: 0 4px 12px rgba(0, 188, 212, 0.3);
+}
+
+/* NOTIFICACIONES TOAST */
+.toast-container {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: auto;
+  min-width: 280px;
+  max-width: 360px;
+  padding: 14px 18px;
+  border-radius: 12px;
+  background: rgba(15, 15, 30, 0.95);
+  backdrop-filter: blur(10px);
+  color: #fff;
+  font-size: 14px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  border-left: 5px solid #00bcd4;
+  opacity: 0;
+  transform: translateX(50px);
+  transition: all 0.3s cubic-bezier(0.68, -0.55, 0.27, 1.55);
+}
+
+.toast.show {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast.error {
+  border-left-color: #ff2e88;
+  background: rgba(42, 24, 26, 0.95);
+  color: #ffcdd2;
+}
+
+.toast.success {
+  border-left-color: #25d366;
+  background: rgba(17, 42, 29, 0.95);
+  color: #b9f6ca;
+}
+
+.toast.info {
+  border-left-color: #00bcd4;
+  background: rgba(15, 39, 56, 0.95);
+  color: #e0f7fa;
+}
+
+@media(max-width: 992px) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media(max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: 12px;
+    padding: 12px;
+  }
+  .nav-left {
+    width: 100%;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .nav-right {
+    margin-left: 0;
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .theme-lang-group {
+    width: 100%;
+    justify-content: flex-end;
+    margin: 0;
+  }
+  .nav-right > .nav-btn {
+    min-height: 42px;
+    flex: 0 0 auto;
+    justify-content: center;
+    text-align: center;
+  }
+  .nav-account-slot {
+    margin: 0 0 0 auto;
+  }
+  .nav-account-slot.guest-mode {
+    flex: 0 0 auto;
+    justify-content: flex-end;
+  }
+  .nav-account-slot.guest-mode #guestAuthControls {
+    justify-content: flex-end;
+  }
+  .nav-user-slot {
+    position: relative;
+    top: auto;
+    right: auto;
+    transform: none;
+  }
+  .nav-btn,
+  .btn-icon-theme,
+  .lang-select-dropdown {
+    min-height: 42px;
+  }
+  .hero {
+    padding: 42px 16px 24px;
+  }
+  .hero h1 {
+    font-size: 34px;
+    text-wrap: balance;
+  }
+  .hero p {
+    max-width: 560px;
+    margin-right: auto;
+    margin-left: auto;
+  }
+  .search-container {
+    width: calc(100% - 28px);
+    margin: 24px auto 18px;
+  }
+  .search-input {
+    min-height: 48px;
+  }
+  .categories {
+    gap: 8px;
+    margin: 0 12px 32px;
+  }
+  .cat-btn {
+    min-height: 40px;
+    padding: 8px 14px;
+  }
+  .grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 0 16px 40px;
+  }
+  .card-img-wrapper {
+    height: auto;
+    aspect-ratio: 16 / 10;
+  }
+  .card .info {
+    padding: 14px;
+  }
+  footer {
+    padding: 38px 20px 26px;
+  }
+  .footer-content {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 26px 20px;
+  }
+  .footer-brand {
+    max-width: none;
+    grid-column: 1 / -1;
+  }
+  .toast-container {
+    top: 12px;
+    right: 12px;
+    left: 12px;
+  }
+  .toast {
+    min-width: 0;
+    max-width: none;
+  }
+  .modal-overlay {
+    height: 100dvh;
+    padding: 12px;
+  }
+  .auth-card {
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+    padding: 30px 20px;
+  }
+  .close-modal,
+  .toggle-password {
+    min-width: 42px;
+    min-height: 42px;
+  }
+}
+
+@media(max-width: 480px) {
+  .logo {
+    gap: 7px;
+    font-size: 17px;
+  }
+  .logo img {
+    width: 34px;
+    height: 34px;
+  }
+  .btn-nav-action {
+    padding: 8px 11px;
+    font-size: 12px;
+  }
+  .hero h1 {
+    font-size: 30px;
+  }
+  .grid {
+    grid-template-columns: minmax(0, 1fr);
+    max-width: 440px;
+  }
+  .card .info {
+    padding: 16px;
+  }
+  .footer-content {
+    gap: 24px 14px;
+  }
+  .footer-links h4 {
+    font-size: 14px;
+  }
+  .footer-links a,
+  .footer-links button {
+    font-size: 13px;
+  }
+  .auth-card {
+    border-radius: 20px;
+  }
+}
+
+@media(max-width: 360px) {
+  .hero h1 {
+    font-size: 27px;
+  }
+  .nav-right > .nav-btn {
+    padding-right: 9px;
+    padding-left: 9px;
+    font-size: 12px;
+  }
+}
+
+/* ===== ANTI-PARPADEO DE SESIÓN ===== */
+/* Mientras Firebase no responde, no se muestra ni invitado ni usuario */
+html.auth-pending #guestAuthControls,
+html.auth-pending #navUserSlot {
+  visibility: hidden !important;
+}
+/* Si probablemente hay sesión, mostrar directamente el menú de usuario */
+html.auth-pending.assume-logged-in #guestAuthControls {
+  display: none !important;
+}
+html.auth-pending.assume-logged-in #navUserSlot {
+  display: flex !important;
+  visibility: visible !important;
+}
+</style>
+</head>
+<body>
+
+<div id="toastContainer" class="toast-container"></div>
+<canvas id="galaxy"></canvas>
+
+<!-- BARRA DE NAVEGACIÓN -->
+<!-- BARRA DE NAVEGACIÓN CORREGIDA -->
+<nav>
+  <div class="nav-left">
+    <a href="Nebula.html" class="logo">
+      <img src="logo.png.jpeg" alt="Logo">
+      LOVE CODE
+    </a>
+    <a href="#catalogo" class="btn-nav-action" data-i18n="nav_explore">🔍 Explorar</a>
+  </div>
+
+  <div class="nav-right" id="navAuthArea">
+    <div class="theme-lang-group">
+      <button id="btnThemeToggle" class="btn-icon-theme" onclick="toggleTheme()" title="Cambiar tema">🌙</button>
+      <div class="lang-selector-wrapper">
+        <span class="lang-icon">文A</span>
+        <span style="font-size: 13px;" data-i18n="language_label">Idioma</span>
+        <select id="langSelect" class="lang-select-dropdown" onchange="changeLanguage(this.value)">
+          <option value="es" selected>Español</option>
+          <option value="en">English</option>
+        </select>
+      </div>
+    </div>
+
+    <a href="#donar" class="nav-btn btn-donar" data-i18n="btn_donate">Donar</a>
+    <a href="#miembro" class="nav-btn btn-miembro" data-i18n="btn_member">Ser Miembro</a>
+    <a href="#" onclick="abrirReporteWhatsApp(event)" class="nav-btn btn-reportar" data-i18n="btn_report">💬 Reportar</a>
+    
+    <!-- Controles para usuarios no autenticados -->
+    <div id="guestAuthControls" style="display: flex; gap: 12px; align-items: center;">
+      <button type="button" class="nav-btn btn-login" onclick="openAuthModal('login')" data-i18n="btn_login">Iniciar sesión</button>
+      <button type="button" class="nav-btn btn-register" onclick="openAuthModal('register')" data-i18n="btn_register">Registrarse</button>
+    </div>
+
+    <!-- Slot para el perfil del usuario autenticado -->
+    <div class="nav-user-slot" id="navUserSlot" style="display: none;">
+      <div class="user-menu-wrapper">
+        <button type="button" class="user-avatar-btn" id="navUserAvatar" onclick="toggleUserDropdown()" title="Perfil" data-i18n-title="profile" aria-label="Abrir menú de usuario" aria-expanded="false">
+          <span id="navUserInitial">U</span>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="dropdown-header">
+            <div class="dropdown-avatar" id="dropdownAvatar">U</div>
+            <div class="dropdown-info">
+              <h4 id="dropdownUserName">Usuario</h4>
+              <p id="dropdownUserEmail">usuario@email.com</p>
+            </div>
+          </div>
+          <a href="perfil.html" class="btn-dropdown-option" data-i18n="profile">Perfil</a>
+          <button class="btn-dropdown-logout" onclick="logoutUser()" data-i18n="logout">Cerrar sesión</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</nav>
+<script>
+  // Rellena el menú de usuario con los datos guardados para evitar ver "U" / "Usuario" un instante
+  try {
+    var hint = JSON.parse(localStorage.getItem('authHint') || 'null');
+    if (hint) {
+      var set = function (id, t) { var el = document.getElementById(id); if (el && t) el.textContent = t; };
+      set('navUserInitial', hint.initial);
+      set('dropdownAvatar', hint.initial);
+      set('dropdownUserName', hint.name);
+      set('dropdownUserEmail', hint.email);
+    }
+  } catch (e) {}
+</script>
+
+<!-- HERO SECTION -->
+<section class="hero">
+  <h1 data-i18n="hero_title">Descubre plantillas<br><span>HTML increíbles</span></h1>
+  <p data-i18n="hero_desc">Explora nuestra colección de archivos HTML de alta calidad. Plantillas gratuitas y premium para tu próximo detalle especial.</p>
+
+  <div class="search-container">
+    <span class="search-icon">🔍</span>
+    <input type="text" id="searchInput" class="search-input" placeholder="Buscar plantillas..." data-i18n-placeholder="search_ph" onkeyup="filtrarPlantillas()">
+  </div>
+
+  <div class="categories">
+    <button class="cat-btn active" onclick="filtrarCategoria('todos', this)" data-i18n="cat_all">Todos</button>
+    <button class="cat-btn" onclick="filtrarCategoria('gratis', this)" data-i18n="cat_free">Gratis</button>
+    <button class="cat-btn" onclick="filtrarCategoria('vip', this)" data-i18n="cat_vip">VIP</button>
+    <button class="cat-btn" onclick="filtrarCategoria('amor', this)" data-i18n="cat_love">Amor</button>
+    <button class="cat-btn" onclick="filtrarCategoria('amistad', this)" data-i18n="cat_friend">Amistad</button>
+    <button class="cat-btn" onclick="filtrarCategoria('romance', this)" data-i18n="cat_romance">Fondos De Pantalla</button>
+    <button class="cat-btn" onclick="filtrarCategoria('otro', this)" data-i18n="cat_other">Eventos Sociales</button>
+  </div>
+</section>
+
+<!-- CATÁLOGO DE PLANTILLAS -->
+<div id="catalogo" class="grid">
+  <div class="card" data-category="vip romance amor">
+    <a href="galaxia.int.html" class="card-link" target="_blank" rel="noopener">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="Hot_Wh.jpg" alt="Galaxia De Hot Wheels" data-i18n-alt="card1_title">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card1_title">Galaxia Día de la Novia</h3>
+        <p data-i18n="card1_desc">Efecto galáctico interactivo con música y dedicatoria personalizada</p>
+        <span class="price-tag premium" data-i18n="price_premium_2">• Premium $2.00</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis amor amistad">
+    <a href="flores-amarillas.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500" alt="Flores Amarillas">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card2_title">Jardín de gerberas</h3>
+        <p data-i18n="card2_desc">Un detalle bonito para esa persona que quieres</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip amor romance">
+    <a href="corazon-infinito.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500" alt="Corazón Infinito">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card3_title">Corazón Infinito & Fotos</h3>
+        <p data-i18n="card3_desc">Animación en 3D con tus mejores momentos e interacción rápida</p>
+        <span class="price-tag premium" data-i18n="price_premium_399">• Premium $3.99</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip romance">
+    <a href="galaxia.int.html" class="card-link" target="_blank" rel="noopener">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="Hot_Wh.jpg" alt="Galaxia Día de la Novia v2" data-i18n-alt="card4_title">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card4_title">Galaxia Día de la Novia v2</h3>
+        <p data-i18n="card4_desc">Detalle interactivo completo con estrellas dinámicas</p>
+        <span class="price-tag premium" data-i18n="price_premium_2">• Premium $2.00</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis amistad">
+    <a href="flores-amarillas.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500" alt="Flores Amarillas Especiales">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card5_title">Flores Amarillas Especiales</h3>
+        <p data-i18n="card5_desc">Animación ligera ideal para dedicar en WhatsApp</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip amor">
+    <a href="corazon-infinito.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500" alt="Corazón Infinito VIP">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card6_title">Corazón Infinito Edición VIP</h3>
+        <p data-i18n="card6_desc">Edición especial con reproductor de música personalizado</p>
+        <span class="price-tag premium" data-i18n="price_premium_399">• Premium $3.99</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip otro">
+    <a href="boda.html" class="card-link" target="_blank" rel="noopener">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="boda.jpg" alt="Invitaciones para boda" data-i18n-alt="card7_title">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card7_title">Invitaciones para boda</h3>
+        <p data-i18n="card7_desc">Invitaciones Personalizadas para invitaciones de boda</p>
+        <span class="price-tag premium" data-i18n="price_premium_450">• Premium $4.50</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis romance amor">
+    <a href="flores-amarillas.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500" alt="Ramo de Rosas">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card8_title">Ramo de Rosas Virtuales</h3>
+        <p data-i18n="card8_desc">Interactivo y personalizable con mensaje secreto</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip romance amor">
+    <a href="corazon-infinito.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500" alt="Carta de Amor">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card9_title">Carta de Amor Animada</h3>
+        <p data-i18n="card9_desc">Sobre interactivo con efecto de escritura en vivo</p>
+        <span class="price-tag premium" data-i18n="price_premium_250">• Premium $2.50</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip amor">
+    <a href="corazon-infinito.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="https://images.unsplash.com/photo-1518199266791-5375a83190b7?w=500" alt="Álbum Romántico">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card10_title">Álbum Fotográfico Interactivo</h3>
+        <p data-i18n="card10_desc">Galería 3D para recordar momentos inolvidables</p>
+        <span class="price-tag premium" data-i18n="price_premium_350">• Premium $3.50</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis amistad">
+    <a href="flores-amarillas.html" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500" alt="Tarjeta Amistad">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card11_title">Tarjeta de Amistad Animada</h3>
+        <p data-i18n="card11_desc">Efectos de confeti e interactividad sencilla</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="vip otro">
+    <a href="Cumpleaños.html" class="card-link" target="_blank" rel="noopener">
+      <div class="card-img-wrapper">
+        <span class="badge-floating premium" data-i18n="badge_vip">💎 VIP</span>
+        <img src="cumple.png" alt="Universo Espacial" data-i18n-alt="card12_title">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card12_title">Tarjetas de cumpleaños personalizadas</h3>
+        <p data-i18n="card12_desc">Personalizadas a su gusto y con el mejor diseño</p>
+        <span class="price-tag premium" data-i18n="price_premium_4">• Premium $4.00</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=boda" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1519741497674-611481863552?w=500" alt="Invitación de boda">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card13_title">Invitación de boda</h3>
+        <p data-i18n="card13_desc">Una historia nueva merece una invitación especial</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=quinceanera" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=500" alt="Invitación de quinceañera">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card14_title">Invitación de quinceañera</h3>
+        <p data-i18n="card14_desc">Un diseño brillante para una noche inolvidable</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=cumpleanos" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1530103862676-de8c9debad1d?w=500" alt="Invitación de cumpleaños">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card15_title">Invitación de cumpleaños</h3>
+        <p data-i18n="card15_desc">Reúne a tus personas favoritas para celebrar</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=babyshower" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1519689680058-324335c77eba?w=500" alt="Invitación de baby shower">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card16_title">Invitación de baby shower</h3>
+        <p data-i18n="card16_desc">Una bienvenida dulce para una nueva aventura</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=graduacion" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1523050854058-8df90110c9f1?w=500" alt="Invitación de graduación">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card17_title">Invitación de graduación</h3>
+        <p data-i18n="card17_desc">Comparte con tu familia el logro de tantos años</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=bautizo" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1511895426328-dc8714191300?w=500" alt="Invitación de bautizo">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card18_title">Invitación de bautizo</h3>
+        <p data-i18n="card18_desc">Un recuerdo familiar para un día lleno de cariño</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=aniversario" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1516589178581-6cd7833ae3b2?w=500" alt="Invitación de aniversario">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card19_title">Invitación de aniversario</h3>
+        <p data-i18n="card19_desc">Celebra los recuerdos y todo lo que viene</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=comunion" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1507504031003-b417219a0fde?w=500" alt="Invitación de primera comunión">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card20_title">Invitación de primera comunión</h3>
+        <p data-i18n="card20_desc">Un diseño sereno para compartir en familia</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=infantil" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1564429238817-393bd4286b2d?w=500" alt="Invitación de fiesta infantil">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card21_title">Invitación de fiesta infantil</h3>
+        <p data-i18n="card21_desc">Colores y diversión para celebrar a lo grande</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+
+  <div class="card" data-category="gratis otro">
+    <a href="plantilla-evento.html?evento=reunion" class="card-link">
+      <div class="card-img-wrapper">
+        <span class="badge-floating" data-i18n="badge_free">📦 GRATIS</span>
+        <img src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=500" alt="Invitación de reunión familiar">
+      </div>
+      <div class="info">
+        <h3 data-i18n="card22_title">Invitación de reunión familiar</h3>
+        <p data-i18n="card22_desc">Una mesa compartida y muchas historias por contar</p>
+        <span class="price-tag" data-i18n="price_free">• Gratis</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<div class="load-more-container">
+  <button id="btnLoadMore" class="btn-load-more" onclick="cargarMasPlantillas()" data-i18n="load_more">Cargar más archivos</button>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-content">
+    <div class="footer-brand">
+      <a href="Nebula.html" class="logo">
+        <img src="logo.png.jpeg" alt="Logo">
+        LOVE CODE
+      </a>
+      <p data-i18n="footer_brand_desc">La mejor plataforma para descubrir y compartir plantillas HTML de alta calidad.</p>
+    </div>
+
+    <div class="footer-links">
+      <h4 data-i18n="footer_plat">Plataforma</h4>
+      <ul>
+        <li><a href="#catalogo" data-i18n="footer_explore">Explorar archivos</a></li>
+        <li><a href="#vip" data-i18n="footer_vip">Planes VIP</a></li>
+      </ul>
+    </div>
+
+    <div class="footer-links">
+      <h4 data-i18n="footer_support">Soporte</h4>
+      <ul>
+        <li><button  style="background:none; border:none; color:var(--text-muted); cursor:pointer;" data-i18n="btn_login">Iniciar sesión</button></li>
+        <li><a href="#" onclick="abrirReporteWhatsApp(event)" data-i18n="footer_tech">Soporte técnico</a></li>
+      </ul>
+    </div>
+  </div>
+</footer>
+
+<!-- MODAL DE AUTENTICACIÓN -->
+<div class="modal-overlay" id="authModal">
+  <div class="auth-card">
+    <button class="close-modal" onclick="closeAuthModal()">&times;</button>
+    <div class="auth-avatar-icon">
+      <svg viewBox="0 0 24 24">
+        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+      </svg>
+    </div>
+    <div class="auth-header">
+      <h2 id="modalTitle">Crear cuenta</h2>
+      <p id="modalSub">Únete a nuestra comunidad de desarrolladores</p>
+    </div>
+    <form class="auth-form" id="authForm" method="POST" action="#" onsubmit="handleAuthSubmit(event)">
+      <div class="form-group" id="groupName">
+        <label for="authName" data-i18n="auth_name_label">Nombre completo</label>
+        <div class="input-wrapper">
+          <span class="input-icon">👤</span>
+          <input type="text" id="authName" name="name" autocomplete="name" placeholder="Nombre completo" data-i18n-placeholder="auth_name_placeholder">
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="authEmail" data-i18n="auth_email_label">Correo electrónico</label>
+        <div class="input-wrapper">
+          <span class="input-icon">✉️</span>
+          <input type="email" id="authEmail" name="username" autocomplete="username" placeholder="tu@email.com" data-i18n-placeholder="auth_email_placeholder" required>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="authPassword" data-i18n="auth_password_label">Contraseña</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="authPassword" name="password" autocomplete="new-password" placeholder="••••••••" required>
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('authPassword', this)">👁️</button>
+        </div>
+      </div>
+      <div class="form-group" id="groupConfirmPassword">
+        <label for="authConfirmPassword" data-i18n="auth_confirm_label">Confirmar contraseña</label>
+        <div class="input-wrapper">
+          <span class="input-icon">🔒</span>
+          <input type="password" id="authConfirmPassword" name="confirm_password" autocomplete="new-password" placeholder="••••••••">
+          <button type="button" class="toggle-password" onclick="togglePasswordVisibility('authConfirmPassword', this)">👁️</button>
+        </div>
+      </div>
+      <div class="terms-group" id="groupTerms">
+        <input type="checkbox" id="authTerms" name="terms">
+        <label for="authTerms" data-i18n="auth_terms">Acepto los <a href="#">términos y condiciones</a> y la <a href="#">política de privacidad</a></label>
+      </div>
+      <button type="submit" class="btn-submit-auth" id="btnSubmitModal">
+        <span id="btnSubmitText">Crear cuenta</span>
+      </button>
+      <button type="button" class="btn-social-login" onclick="loginWithGoogle()">
+        <svg viewBox="0 0 24 24">
+          <path fill="#4285F4" d="M23.745 12.27c0-.7-.06-1.4-.19-2.07H12v4.51h6.6c-.29 1.52-1.14 2.82-2.4 3.68v3.05h3.88c2.27-2.09 3.665-5.17 3.665-9.17z"/>
+          <path fill="#34A853" d="M12 24c3.24 0 5.95-1.08 7.93-2.91l-3.88-3.05c-1.08.72-2.45 1.16-4.05 1.16-3.12 0-5.77-2.11-6.72-4.96H1.29v3.15C3.26 21.3 7.31 24 12 24z"/>
+          <path fill="#FBBC05" d="M5.28 14.24c-.25-.72-.38-1.49-.38-2.24s.13-1.52.38-2.24V6.61H1.29C.47 8.24 0 10.06 0 12s.47 3.76 1.29 5.39l3.99-3.15z"/>
+          <path fill="#EA4335" d="M12 4.75c1.77 0 3.35.61 4.6 1.8l3.42-3.42C17.95 1.19 15.24 0 12 0 7.31 0 3.26 2.7 1.29 6.61l3.99 3.15c.95-2.85 3.6-4.96 6.72-4.96z"/>
+        </svg>
+        <span id="btnGoogleText">Registrarse con Google</span>
+      </button>
+      <div class="auth-switch">
+        <span id="switchText">¿Ya tienes cuenta?</span>
+        <button type="button" id="btnSwitchMode" onclick="toggleAuthMode()">Inicia sesión</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- TRADUCCIONES -->
+<script>
+const translations = {
+  es: {
+    language_label: "Idioma",
+    nav_explore: "🔍 Explorar",
+    btn_donate: "Donar",
+    btn_member: "Ser Miembro",
+    btn_report: "💬 Reportar",
+    btn_login: "Iniciar sesión",
+    btn_register: "Registrarse",
+    profile: "Perfil",
+    logout: "Cerrar sesión",
+    theme_title: "Cambiar tema",
+    badge_vip: "💎 VIP",
+    badge_free: "📦 GRATIS",
+    price_free: "• Gratis",
+    price_premium_2: "• Premium $2.00",
+    price_premium_250: "• Premium $2.50",
+    price_premium_350: "• Premium $3.50",
+    price_premium_399: "• Premium $3.99",
+    price_premium_4: "• Premium $4.00",
+    price_premium_450: "• Premium $4.50",
+    auth_name_label: "Nombre completo",
+    auth_email_label: "Correo electrónico",
+    auth_password_label: "Contraseña",
+    auth_confirm_label: "Confirmar contraseña",
+    auth_name_placeholder: "Nombre completo",
+    auth_email_placeholder: "tu@email.com",
+    auth_show_password: "Mostrar contraseña",
+    modal_close: "Cerrar ventana",
+    page_title: "LOVE CODE - Plantillas HTML Románticas e Interactivas",
+    auth_terms: "Acepto los <a href=\"#\">términos y condiciones</a> y la <a href=\"#\">política de privacidad</a>",
+    auth_register_title: "Crear cuenta",
+    auth_register_subtitle: "Únete a nuestra comunidad de desarrolladores",
+    auth_login_title: "Iniciar Sesión",
+    auth_login_subtitle: "Bienvenido de nuevo a LOVE CODE",
+    auth_create: "Crear cuenta",
+    auth_login: "Iniciar sesión",
+    auth_google_register: "Registrarse con Google",
+    auth_google_login: "Iniciar con Google",
+    auth_have_account: "¿Ya tienes cuenta?",
+    auth_no_account: "¿No tienes cuenta?",
+    auth_switch_login: "Inicia sesión",
+    auth_switch_register: "Regístrate",
+    auth_password_mismatch: "Las contraseñas no coinciden.",
+    auth_terms_required: "Debes aceptar los términos y condiciones.",
+    auth_created: "¡Cuenta creada exitosamente en LOVE CODE!",
+    auth_signed_in: "¡Sesión iniciada correctamente!",
+    auth_invalid_credentials: "Correo o contraseña incorrectos. Si creaste tu cuenta con Google, entra por ahí.",
+    auth_email_exists: "Este correo ya está registrado. Intenta iniciar sesión.",
+    auth_weak_password: "La contraseña debe tener al menos 6 caracteres.",
+    auth_error: "Error de autenticación. Intenta de nuevo.",
+    auth_google_welcome: "¡Bienvenido a LOVE CODE! Registro exitoso.",
+    auth_google_signed_in: "Sesión iniciada con Google.",
+    auth_google_error: "Error al conectar con Google.",
+    auth_logout_success: "Has cerrado sesión.",
+    auth_logout_error: "Error al cerrar sesión.",
+    report_message: "Hola, quiero reportar un error",
+    hero_title: 'Descubre plantillas<br><span>HTML increíbles</span>',
+    hero_desc: 'Explora nuestra colección de archivos HTML de alta calidad. Plantillas gratuitas y premium para tu próximo detalle especial.',
+    search_ph: "Buscar plantillas...",
+    cat_all: "Todos",
+    cat_free: "Gratis",
+    cat_vip: "VIP",
+    cat_love: "Amor",
+    cat_friend: "Amistad",
+    cat_romance: "Fondos De Pantalla",
+    cat_other: "Eventos Sociales",
+    load_more: "Cargar más archivos",
+    no_more: "No hay más archivos",
+    footer_brand_desc: "La mejor plataforma para descubrir y compartir plantillas HTML de alta calidad.",
+    footer_plat: "Plataforma",
+    footer_explore: "Explorar archivos",
+    footer_upload: "Subir archivo",
+    footer_vip: "Planes VIP",
+    footer_support: "Soporte",
+    footer_tech: "Soporte técnico"
+  },
+  en: {
+    language_label: "Language",
+    nav_explore: "🔍 Explore",
+    btn_donate: "Donate",
+    btn_member: "Become Member",
+    btn_report: "💬 Report",
+    btn_login: "Log In",
+    btn_register: "Register",
+    profile: "Profile",
+    logout: "Log out",
+    theme_title: "Change theme",
+    badge_vip: "💎 VIP",
+    badge_free: "📦 FREE",
+    price_free: "• Free",
+    price_premium_2: "• Premium $2.00",
+    price_premium_250: "• Premium $2.50",
+    price_premium_350: "• Premium $3.50",
+    price_premium_399: "• Premium $3.99",
+    price_premium_4: "• Premium $4.00",
+    price_premium_450: "• Premium $4.50",
+    auth_name_label: "Full name",
+    auth_email_label: "Email address",
+    auth_password_label: "Password",
+    auth_confirm_label: "Confirm password",
+    auth_name_placeholder: "Full name",
+    auth_email_placeholder: "you@email.com",
+    auth_show_password: "Show password",
+    modal_close: "Close dialog",
+    page_title: "LOVE CODE - Romantic and Interactive HTML Templates",
+    auth_terms: "I accept the <a href=\"#\">terms and conditions</a> and the <a href=\"#\">privacy policy</a>",
+    auth_register_title: "Create account",
+    auth_register_subtitle: "Join our developer community",
+    auth_login_title: "Log in",
+    auth_login_subtitle: "Welcome back to LOVE CODE",
+    auth_create: "Create account",
+    auth_login: "Log in",
+    auth_google_register: "Sign up with Google",
+    auth_google_login: "Continue with Google",
+    auth_have_account: "Already have an account?",
+    auth_no_account: "Don't have an account?",
+    auth_switch_login: "Log in",
+    auth_switch_register: "Sign up",
+    auth_password_mismatch: "Passwords do not match.",
+    auth_terms_required: "You must accept the terms and conditions.",
+    auth_created: "LOVE CODE account created successfully!",
+    auth_signed_in: "You are signed in.",
+    auth_invalid_credentials: "Incorrect email or password. If you signed up with Google, use that option.",
+    auth_email_exists: "This email is already registered. Try signing in.",
+    auth_weak_password: "Password must be at least 6 characters long.",
+    auth_error: "Authentication failed. Please try again.",
+    auth_google_welcome: "Welcome to LOVE CODE! Registration successful.",
+    auth_google_signed_in: "Signed in with Google.",
+    auth_google_error: "Could not connect to Google.",
+    auth_logout_success: "You have signed out.",
+    auth_logout_error: "Could not sign out.",
+    report_message: "Hello, I want to report an issue",
+    hero_title: 'Discover Amazing<br><span>HTML Templates</span>',
+    hero_desc: 'Explore our collection of high-quality HTML files. Free and premium templates for your next special detail.',
+    search_ph: "Search templates...",
+    cat_all: "All",
+    cat_free: "Free",
+    cat_vip: "VIP",
+    cat_love: "Love",
+    cat_friend: "Friendship",
+    cat_romance: "Wallpapers",
+    cat_other: "Social Events",
+    load_more: "Load more files",
+    no_more: "No more files",
+    footer_brand_desc: "The best platform to discover and share high-quality HTML templates.",
+    footer_plat: "Platform",
+    footer_explore: "Explore files",
+    footer_upload: "Upload file",
+    footer_vip: "VIP Plans",
+    footer_support: "Support",
+    footer_tech: "Technical Support"
+  }
+};
+
+const catalogTranslations = {
+  es: [
+    ["Galaxia Azul Hot Wheels", "Efecto galáctico interactivo con música y dedicatoria personalizada"],
+    ["Jardín de gerberas", "Un detalle bonito para esa persona que quieres"],
+    ["Corazón Infinito & Fotos", "Animación en 3D con tus mejores momentos e interacción rápida"],
+    ["Galaxia Día de la Novia v2", "Detalle interactivo completo con estrellas dinámicas"],
+    ["Flores Amarillas Especiales", "Animación ligera ideal para dedicar en WhatsApp"],
+    ["Invitaciones para Boda", "Tarjetas de invitación para tu boda personalizadas"],
+    ["Tarjetas de invitación para tu boda personalizadas", "Perzonalizada a su gusto y con el mejor diseño"],
+    ["Ramo de Rosas Virtuales", "Interactivo y personalizable con mensaje secreto"],
+    ["Carta de Amor Animada", "Sobre interactivo con efecto de escritura en vivo"],
+    ["Álbum Fotográfico Interactiva", "Galería 3D para recordar momentos inolvidables"],
+    ["Tarjeta de Amistad Animada", "Efectos de confeti e interactividad sencilla"],
+    ["Tarjetas de cumpleaños personalizadas", "Personalizadas a su gusto y con el mejor diseño"],
+    ["Invitación de boda", "Una historia nueva merece una invitación especial"],
+    ["Invitación de quinceañera", "Un diseño brillante para una noche inolvidable"],
+    ["Invitación de cumpleaños", "Reúne a tus personas favoritas para celebrar"],
+    ["Invitación de baby shower", "Una bienvenida dulce para una nueva aventura"],
+    ["Invitación de graduación", "Comparte con tu familia el logro de tantos años"],
+    ["Invitación de bautizo", "Un recuerdo familiar para un día lleno de cariño"],
+    ["Invitación de aniversario", "Celebra los recuerdos y todo lo que viene"],
+    ["Invitación de primera comunión", "Un diseño sereno para compartir en familia"],
+    ["Invitación de fiesta infantil", "Colores y diversión para celebrar a lo grande"],
+    ["Invitación de reunión familiar", "Una mesa compartida y muchas historias por contar"]
+  ],
+  en: [
+    ["Galactic Valentine's Day", "Interactive galaxy effects with music and a personalized dedication"],
+    ["Gerbera Garden", "A lovely surprise for someone special"],
+    ["Infinite Heart & Photos", "3D animation featuring your favorite memories and quick interactions"],
+    ["Galactic Valentine's Day v2", "Complete interactive experience with dynamic stars"],
+    ["Special Yellow Flowers", "A lightweight animation, perfect to share on WhatsApp"],
+    ["Infinite Heart VIP Edition", "Special edition with a personalized music player"],
+    ["Hot Wheels Blue Galaxy", "Animated blue galaxy background with themed tracks"],
+    ["Virtual Rose Bouquet", "Interactive and customizable with a secret message"],
+    ["Animated Love Letter", "Interactive envelope with a live typing effect"],
+    ["Interactive Photo Album", "A 3D gallery for unforgettable memories"],
+    ["Animated Friendship Card", "Confetti effects and simple interactions"],
+    ["VIP Birthday Universe", "Interactive stars and fireworks"],
+    ["Wedding invitation", "A new story deserves a special invitation"],
+    ["Quinceañera invitation", "A sparkling design for an unforgettable night"],
+    ["Birthday invitation", "Bring your favorite people together to celebrate"],
+    ["Baby shower invitation", "A sweet welcome to a new adventure"],
+    ["Graduation invitation", "Celebrate years of hard work with your family"],
+    ["Baptism invitation", "A family keepsake for a day full of love"],
+    ["Anniversary invitation", "Celebrate the memories and everything still to come"],
+    ["First Communion invitation", "A calm design to celebrate with family"],
+    ["Kids' party invitation", "Color and fun for a big celebration"],
+    ["Family gathering invitation", "A shared table and stories to tell"]
+  ]
+};
+
+Object.keys(catalogTranslations).forEach((language) => {
+  catalogTranslations[language].forEach(([title, description], index) => {
+    const cardNumber = index + 1;
+    translations[language][`card${cardNumber}_title`] = title;
+    translations[language][`card${cardNumber}_desc`] = description;
+  });
+});
+
+let currentLang = 'es';
+
+function changeLanguage(lang) {
+  currentLang = translations[lang] ? lang : 'es';
+  const copy = translations[currentLang];
+  localStorage.setItem('langPreference', currentLang);
+  document.documentElement.lang = currentLang;
+  document.title = copy.page_title;
+  
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const key = el.getAttribute('data-i18n');
+    if (copy[key]) el.innerHTML = copy[key];
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
+    const key = el.getAttribute('data-i18n-placeholder');
+    if (copy[key]) el.placeholder = copy[key];
+  });
+
+  document.querySelectorAll('[data-i18n-title]').forEach(el => {
+    const key = el.getAttribute('data-i18n-title');
+    if (copy[key]) el.title = copy[key];
+  });
+
+  document.querySelectorAll('[data-i18n-alt]').forEach(el => {
+    const key = el.getAttribute('data-i18n-alt');
+    if (copy[key]) el.alt = copy[key];
+  });
+
+  document.querySelectorAll('[data-i18n-aria-label]').forEach(el => {
+    const key = el.getAttribute('data-i18n-aria-label');
+    if (copy[key]) el.setAttribute('aria-label', copy[key]);
+  });
+
+  document.querySelectorAll('#catalogo .card').forEach(card => {
+    const title = card.querySelector('h3');
+    const image = card.querySelector('img');
+    if (title && image) image.alt = title.textContent;
+  });
+
+  if (document.getElementById('authModal').classList.contains('active')) {
+    setAuthMode(currentAuthMode);
+  }
+
+  actualizarCatalogo();
+}
+
+function toggleTheme() {
+  const body = document.body;
+  const btn = document.getElementById('btnThemeToggle');
+  body.classList.toggle('light-mode');
+
+  if (body.classList.contains('light-mode')) {
+    btn.innerHTML = '☀';
+    localStorage.setItem('themePreference', 'light');
+  } else {
+    btn.innerHTML = '🌙';
+    localStorage.setItem('themePreference', 'dark');
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  const savedTheme = localStorage.getItem('themePreference');
+  const btn = document.getElementById('btnThemeToggle');
+
+  if (savedTheme === 'light') {
+    document.body.classList.add('light-mode');
+    if (btn) btn.innerHTML = '☀️';
+  }
+
+  const savedLang = localStorage.getItem('langPreference') || 'es';
+  const langSelect = document.getElementById('langSelect');
+  if (langSelect) langSelect.value = savedLang;
+  changeLanguage(savedLang);
+});
+</script>
+
+<!-- CATÁLOGO Y FILTROS -->
+<script>
+let tarjetasVisibles = 6;
+const incrementoTarjetas = 6;
+let categoriaActual = 'todos';
+
+function obtenerTarjetasFiltradas() {
+  const cards = Array.from(document.querySelectorAll('#catalogo .card'));
+  if (categoriaActual === 'todos') return cards;
+  return cards.filter(card => {
+    const cat = card.getAttribute('data-category') || '';
+    return cat.includes(categoriaActual);
+  });
+}
+
+function actualizarCatalogo() {
+  const todasLasTarjetas = document.querySelectorAll('#catalogo .card');
+  const filtradas = obtenerTarjetasFiltradas();
+  const btnLoadMore = document.getElementById('btnLoadMore');
+
+  todasLasTarjetas.forEach(card => card.style.display = 'none');
+
+  filtradas.forEach((card, index) => {
+    if (index < tarjetasVisibles) {
+      card.style.display = 'flex';
+    }
+  });
+
+  if (btnLoadMore) {
+    if (filtradas.length <= tarjetasVisibles) {
+      btnLoadMore.innerText = translations[currentLang].no_more;
+      btnLoadMore.disabled = true;
+      btnLoadMore.style.opacity = '0.5';
+      btnLoadMore.style.cursor = 'not-allowed';
+    } else {
+      btnLoadMore.style.display = 'inline-block';
+      btnLoadMore.innerText = translations[currentLang].load_more;
+      btnLoadMore.disabled = false;
+      btnLoadMore.style.opacity = '1';
+      btnLoadMore.style.cursor = 'pointer';
+    }
+  }
+}
+
+function cargarMasPlantillas() {
+  tarjetasVisibles += incrementoTarjetas;
+  actualizarCatalogo();
+}
+
+function filtrarCategoria(categoria, btn) {
+  categoriaActual = categoria;
+  tarjetasVisibles = 6;
+  document.getElementById('searchInput').value = '';
+
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+
+  actualizarCatalogo();
+}
+
+function filtrarPlantillas() {
+  const input = document.getElementById('searchInput').value.toLowerCase().trim();
+  const cards = document.querySelectorAll('#catalogo .card');
+  const btnLoadMore = document.getElementById('btnLoadMore');
+
+  if (input !== '') {
+    document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+    cards.forEach(card => {
+      const titulo = card.querySelector('h3').innerText.toLowerCase();
+      if (titulo.includes(input)) {
+        card.style.display = 'flex';
+      } else {
+        card.style.display = 'none';
+      }
+    });
+    if (btnLoadMore) btnLoadMore.style.display = 'none';
+  } else {
+    filtrarCategoria('todos', document.querySelector('.cat-btn'));
+  }
+}
+</script>
+
+<!-- REPORTE WHATSAPP -->
+<script>
+function abrirReporteWhatsApp(e) {
+  if (e) e.preventDefault();
+  const telefono = "593980264652";
+  const mensaje = encodeURIComponent(translations[currentLang].report_message || "Hola, quiero reportar un error");
+  const esMovil = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+  if (esMovil) {
+    window.open(`https://api.whatsapp.com/send?phone=${telefono}&text=${mensaje}`, '_blank');
+  } else {
+    window.location.href = `whatsapp://send?phone=${telefono}&text=${mensaje}`;
+  }
+}
+</script>
+
+<!-- MODAL AUTENTICACIÓN & DROPDOWN -->
+<script>
+let currentAuthMode = 'register';
+
+function togglePasswordVisibility(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.innerText = '🙈';
+  } else {
+    input.type = 'password';
+    btn.innerText = '👁️';
+  }
+}
+
+function setAuthMode(mode) {
+  currentAuthMode = mode;
+  const copy = translations[currentLang];
+  const title = document.getElementById('modalTitle');
+  const sub = document.getElementById('modalSub');
+  const btnSubmitText = document.getElementById('btnSubmitText');
+  const btnGoogleText = document.getElementById('btnGoogleText');
+  const switchText = document.getElementById('switchText');
+  const btnSwitchMode = document.getElementById('btnSwitchMode');
+
+  const groupName = document.getElementById('groupName');
+  const groupConfirmPassword = document.getElementById('groupConfirmPassword');
+  const groupTerms = document.getElementById('groupTerms');
+
+  const inputName = document.getElementById('authName');
+  const inputPassword = document.getElementById('authPassword');
+  const inputConfirmPassword = document.getElementById('authConfirmPassword');
+
+  if (mode === 'register') {
+    title.innerText = copy.auth_register_title;
+    sub.innerText = copy.auth_register_subtitle;
+    btnSubmitText.innerText = copy.auth_create;
+    btnGoogleText.innerText = copy.auth_google_register;
+    switchText.innerText = copy.auth_have_account;
+    btnSwitchMode.innerText = copy.auth_switch_login;
+
+    groupName.style.display = 'block';
+    groupConfirmPassword.style.display = 'block';
+    groupTerms.style.display = 'flex';
+
+    inputName.required = true;
+    inputConfirmPassword.required = true;
+    
+    inputPassword.setAttribute('autocomplete', 'new-password');
+  } else {
+    title.innerText = copy.auth_login_title;
+    sub.innerText = copy.auth_login_subtitle;
+    btnSubmitText.innerText = copy.auth_login;
+    btnGoogleText.innerText = copy.auth_google_login;
+    switchText.innerText = copy.auth_no_account;
+    btnSwitchMode.innerText = copy.auth_switch_register;
+
+    groupName.style.display = 'none';
+    groupConfirmPassword.style.display = 'none';
+    groupTerms.style.display = 'none';
+
+    inputName.required = false;
+    inputConfirmPassword.required = false;
+
+    inputPassword.setAttribute('autocomplete', 'current-password');
+  }
+}
+
+function toggleAuthMode() {
+  if (currentAuthMode === 'register') {
+    setAuthMode('login');
+  } else {
+    setAuthMode('register');
+  }
+}
+
+function openAuthModal(type) {
+  setAuthMode(type);
+  document.getElementById('authModal').classList.add('active');
+}
+
+function closeAuthModal() {
+  document.getElementById('authModal').classList.remove('active');
+}
+
+function toggleUserDropdown() {
+  const dropdown = document.getElementById('userDropdown');
+  const btn = document.getElementById('navUserAvatar');
+  const isActive = dropdown.classList.contains('active');
+  
+  if (isActive) {
+    dropdown.classList.remove('active');
+    btn.setAttribute('aria-expanded', 'false');
+  } else {
+    dropdown.classList.add('active');
+    btn.setAttribute('aria-expanded', 'true');
+  }
+}
+
+document.addEventListener('click', (e) => {
+  const userMenu = document.querySelector('.user-menu-wrapper');
+  if (userMenu && !userMenu.contains(e.target)) {
+    const dropdown = document.getElementById('userDropdown');
+    const btn = document.getElementById('navUserAvatar');
+    if (dropdown) dropdown.classList.remove('active');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+});
+</script>
+
+<!-- FIREBASE AUTHENTICATION -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+  import { 
+    initializeAuth,
+    browserPopupRedirectResolver,
+    GoogleAuthProvider, 
+    signInWithPopup,
+    createUserWithEmailAndPassword,
+    signInWithEmailAndPassword,
+    updateProfile,
+    getAdditionalUserInfo,
+    setPersistence,
+    browserLocalPersistence,
+    signOut,
+    signInAnonymously,
+    onAuthStateChanged 
+  } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+  import { getDatabase, ref, push, set, onValue, onDisconnect, remove } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-database.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyBzNwu1mayHRxyKMgHLDv7XSY47o00_TX4",
+    authDomain: "love-code-proyecto.firebaseapp.com",
+    projectId: "love-code-proyecto",
+    storageBucket: "love-code-proyecto.firebasestorage.app",
+    messagingSenderId: "668944314266",
+    appId: "1:668944314266:web:ec491ba279be1d771dd423",
+    measurementId: "G-QDRLTRCVT5"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  // Misma persistencia (localStorage) en todas las páginas y pestañas: la sesión sobrevive a las recargas
+  const auth = initializeAuth(app, {
+    persistence: browserLocalPersistence,
+    popupRedirectResolver: browserPopupRedirectResolver
+  });
+  const googleProvider = new GoogleAuthProvider();
+
+  googleProvider.setCustomParameters({
+    prompt: 'select_account'
+  });
+
+  window.showToast = (message, type = 'info') => {
+    const container = document.getElementById('toastContainer');
+    if (!container) return;
+
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icon = type === 'error' ? '⚠️️' : type === 'success' ? '✅' : 'ℹ️';
+    toast.innerHTML = `<span>${icon}</span> <div>${message}</div>`;
+
+    container.appendChild(toast);
+
+    setTimeout(() => toast.classList.add('show'), 10);
+
+    setTimeout(() => {
+      toast.classList.remove('show');
+      setTimeout(() => toast.remove(), 300);
+    }, 4000);
+  };
+
+  window.handleAuthSubmit = async (e) => {
+    e.preventDefault();
+    const emailInput = document.getElementById('authEmail');
+    const email = emailInput ? emailInput.value.trim() : '';
+    const password = document.getElementById('authPassword').value;
+    const copy = translations[currentLang];
+
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+
+      if (currentAuthMode === 'register') {
+        const name = document.getElementById('authName').value;
+        const confirmPassword = document.getElementById('authConfirmPassword').value;
+        const terms = document.getElementById('authTerms').checked;
+
+        if (password !== confirmPassword) {
+          showToast(copy.auth_password_mismatch, "error");
+          return;
+        }
+
+        if (!terms) {
+          showToast(copy.auth_terms_required, "error");
+          return;
+        }
+
+        const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+        await updateProfile(userCredential.user, { displayName: name });
+        showToast(copy.auth_created, "success");
+        closeAuthModal();
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+        showToast(copy.auth_signed_in, "success");
+        closeAuthModal();
+      }
+    } catch (error) {
+      console.error(error);
+      if (error.code === 'auth/wrong-password' || error.code === 'auth/user-not-found' || error.code === 'auth/invalid-credential') {
+        showToast(copy.auth_invalid_credentials, "error");
+      } else if (error.code === 'auth/email-already-in-use') {
+        showToast(copy.auth_email_exists, "error");
+      } else if (error.code === 'auth/weak-password') {
+        showToast(copy.auth_weak_password, "error");
+      } else {
+        showToast(copy.auth_error, "error");
+      }
+    }
+  };
+
+  window.loginWithGoogle = async () => {
+    const copy = translations[currentLang];
+    try {
+      await setPersistence(auth, browserLocalPersistence);
+      const result = await signInWithPopup(auth, googleProvider);
+      const additionalInfo = getAdditionalUserInfo(result);
+      
+      if (additionalInfo?.isNewUser) {
+        showToast(copy.auth_google_welcome, "success");
+      } else {
+        showToast(copy.auth_google_signed_in, "success");
+      }
+      closeAuthModal();
+    } catch (error) {
+      console.error(error);
+      showToast(copy.auth_google_error, "error");
+    }
+  };
+
+  window.logoutUser = async () => {
+    const copy = translations[currentLang];
+    try {
+      await stopPresence();
+      await signOut(auth);
+      showToast(copy.auth_logout_success, "info");
+    } catch (error) {
+      console.error(error);
+      showToast(copy.auth_logout_error, "error");
+    }
+  };
+
+  // ===== PRESENCIA EN LÍNEA: cuenta usuarios registrados y visitantes =====
+  let presenceDb = null;
+  try { presenceDb = getDatabase(app); } catch (error) { console.error("Realtime Database no disponible:", error); }
+  let stopPresence = async () => {};
+
+  function startPresence(user) {
+    if (!presenceDb) return;
+    const entries = [{ r: push(ref(presenceDb, "presence")), v: { uid: user.uid, anon: user.isAnonymous } }];
+    if (!user.isAnonymous) {
+      const name = user.displayName || user.email?.split("@")[0] || "Usuario";
+      entries.push({ r: push(ref(presenceDb, `onlineUsers/${user.uid}`)), v: { name } });
+    }
+    const off = onValue(ref(presenceDb, ".info/connected"), async (snap) => {
+      if (snap.val() !== true) return;
+      try {
+        for (const { r, v } of entries) {
+          await onDisconnect(r).remove();
+          await set(r, v);
+        }
+      } catch (error) {
+        console.error("No se pudo actualizar la presencia:", error);
+      }
+    });
+    stopPresence = async () => {
+      off();
+      entries.forEach(({ r }) => remove(r).catch(() => {})); // sin esperar: la limpieza nunca debe bloquear nada
+      stopPresence = async () => {};
+    };
+  }
+
+  // Cada visitante sin cuenta recibe una sesión anónima para poder contarlo
+  function handlePresence(firebaseUser) {
+    stopPresence();
+    if (!firebaseUser) {
+      // Se espera un momento: si otra pestaña está iniciando sesión, no se crea una sesión anónima encima
+      setTimeout(() => {
+        if (!auth.currentUser) {
+          signInAnonymously(auth).catch((error) => console.error("Inicio de sesión anónimo no disponible:", error));
+        }
+      }, 2000);
+      return;
+    }
+    startPresence(firebaseUser);
+  }
+
+  onAuthStateChanged(auth, (firebaseUser) => {
+    handlePresence(firebaseUser);
+    // Las sesiones anónimas (visitantes) se tratan como "sin sesión" en la barra
+    const user = firebaseUser && !firebaseUser.isAnonymous ? firebaseUser : null;
+    const guestControls = document.getElementById('guestAuthControls');
+    const userSlot = document.getElementById('navUserSlot');
+
+    if (user) {
+      if (guestControls) guestControls.style.display = 'none';
+      if (userSlot) userSlot.style.display = 'flex';
+
+      const email = user.email || 'usuario@email.com';
+      const displayName = user.displayName || email.split('@')[0] || 'Usuario';
+      const initial = displayName.charAt(0).toUpperCase();
+
+      const navUserInitial = document.getElementById('navUserInitial');
+      if (navUserInitial) navUserInitial.textContent = initial;
+
+      const dropdownAvatar = document.getElementById('dropdownAvatar');
+      if (dropdownAvatar) dropdownAvatar.textContent = initial;
+
+      const dropdownUserName = document.getElementById('dropdownUserName');
+      if (dropdownUserName) dropdownUserName.textContent = displayName;
+
+      const dropdownUserEmail = document.getElementById('dropdownUserEmail');
+      if (dropdownUserEmail) dropdownUserEmail.textContent = email;
+
+      // Guardar pista para el próximo reload (solo visual, la autenticación real la decide Firebase)
+      try {
+        localStorage.setItem('authHint', JSON.stringify({ name: displayName, email: email, initial: initial }));
+      } catch (e) {}
+    } else {
+      if (guestControls) guestControls.style.display = 'flex';
+      if (userSlot) userSlot.style.display = 'none';
+      try { localStorage.removeItem('authHint'); } catch (e) {}
+    }
+
+    // Firebase ya respondió: se puede mostrar el estado correcto
+    document.documentElement.classList.remove('auth-pending');
+  });
+</script>
+
+<!-- EFECTO GALAXIA CANVAS -->
+<script>
+const c = document.getElementById('galaxy'), x = c.getContext('2d');
+c.width = window.innerWidth;
+c.height = window.innerHeight;
+
+window.addEventListener('resize', () => {
+  c.width = window.innerWidth;
+  c.height = window.innerHeight;
+});
+
+let stars = [];
+for(let i = 0; i < 300; i++) {
+  stars.push({
+    x: Math.random() * c.width,
+    y: Math.random() * c.height,
+    r: Math.random() * 1.5,
+    s: Math.random() * 0.5
+  });
+}
+function draw() {
+  const isLightTheme = document.documentElement.classList.contains('light-mode') ||
+    document.body.classList.contains('light-mode');
+  if (isLightTheme) {
+    x.clearRect(0, 0, c.width, c.height);
+  } else {
+    x.fillStyle = '#050510';
+    x.fillRect(0, 0, c.width, c.height);
+
+    const galaxyGlow = x.createRadialGradient(c.width * 0.3, c.height * 0.3, 0, c.width * 0.3, c.height * 0.3, 500);
+    galaxyGlow.addColorStop(0, 'rgba(255, 46, 136, 0.25)');
+    galaxyGlow.addColorStop(1, 'transparent');
+    x.fillStyle = galaxyGlow;
+    x.fillRect(0, 0, c.width, c.height);
+  }
+
+  stars.forEach(s => {
+    x.beginPath();
+    x.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+    x.fillStyle = isLightTheme ? '#7e22ce' : 'white';
+    x.fill();
+    s.y += s.s;
+    if(s.y > c.height) {
+      s.y = 0;
+      s.x = Math.random() * c.width;
+    }
+  });
+  requestAnimationFrame(draw);
+}
+draw();
+</script>
+
+</body>
+</html>
